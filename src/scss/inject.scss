@@ -1,0 +1,21 @@
+@import './mixins';
+
+$text: #333333;
+$disabled-text: #F4F4F4;
+$label-text: #CCCCCC;
+$inner-shadow: #B5B5B5;
+$primary: #7B61FF;
+$success: #5EE48C;
+$error: #FF6161;
+$white: #ffffffff;
+
+*{
+    margin: 0;
+    padding: 0;
+    font-family: "Roboto";
+    font-size: 16px;
+    line-height: 19px;
+    font-weight: 400;
+    font-style: normal;
+    list-style: none;
+}
