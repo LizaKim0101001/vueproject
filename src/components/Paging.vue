@@ -1,63 +1,65 @@
 <template>
     <section class="pagination">
         <div class="pagination_wrapper">
-            <button class="pagination_prev_next" @click="prevPage">Назад</button>
-            <button class="pagination_item button" v-for="item in arrNumbers" @click="paginate" :key="item">{{item}}</button>              
-            <button class="pagination_prev_next" @click="nextPage">Вперед</button>
+            <button class="pagination_prev_next button" @click="prevPage">Назад</button>
+            <button class="pagination_item button" v-for="n in pages" @click="paginate(n)" :key="n">{{n}}</button>              
+            <button class="pagination_prev_next button" @click="nextPage">Вперед</button>
             </div>
         <div class="pagination_shown">
-            Показано {{firstOfPage}} - {{lastOfPage}} из {{param1}}
+            Показано {{firstOfPage}} - {{lastOfPage}} из {{total}}
         </div>
     </section>
 </template>
 
 <script>
 export default {
-	data() {
-        return{
-            currentPage : 1,
-            userPerPage : 10,
-            arrNumbers : [],
-            pages: 0,
-        }
-	},
-	props: {
-        "param1": {
-            type: Number,
-            default:()=> 10
+    data() {
+        return {
+            userPerPage: 10,
+            arrNumbers: [],
+        };
+    },
+    props: {
+        "total": {
+            type: String,
+            default: 10
+        },
+        "currentPage": {
+            type: String,
+            default: "1"
+        },
+        
+    },
+    computed: {
+        firstOfPage() {
+            return (1 + (this.currentPage * this.userPerPage));
+        },
+        pages(){
+            return Math.ceil(this.total / this.userPerPage);
+        },
+        lastOfPage() {
+            if ((this.currentPage + 1) === this.pages) {
+                return this.total;
+            }
+            else {
+                return this.userPerPage * (this.currentPage + 1);
+            }
+        },
+    },
+    mounted() {
+
+    },
+    methods: {
+        nextPage() {
+            this.currentPage = this.currentPage + 1;
+        },
+        prevPage() {
+            this.currentPage = this.currentPage - 1;
+        },
+        paginate(item) {
+            this.currentPage = (item - 1);
         }
     },
-	computed: {
-
-        firstOfPage(){
-           return (1  + (this.currentPage  * this.userPerPage))
-        },
-        lastOfPage(){
-            if ((this.currentPage + 1) === this.pages) {
-            return this.param1
-            } else {
-                return this.userPerPage * (this.currentPage +1 )
-            }
-        }
-	},
-	mounted() {
-        this.pages = this.param1/this.userPerPage
-        this.pages = Math.ceil(this.param1/this.userPerPage)
-        for (let i = 1; i <= this.pages ; i++) {
-            this.arrNumbers.push(i)
-            }
-	},
-	methods: {
-        nextPage (){
-        this.currentPage = this.currentPage +1
-     },
-        prevPage (){
-            this.currentPage = this.currentPage -1
-     },
-        paginate (e){
-        this.currentPage = (e.target.textContent -1 )
-     }
-	},
 }
 </script>
 

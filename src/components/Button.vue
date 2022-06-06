@@ -1,5 +1,7 @@
 <template>
-  <button  :class="[typeBtn, classButton]">{{titleBtn}}</button>
+  <button class="button">
+    <slot></slot>
+  </button>
 </template>
 
 <script>
@@ -10,15 +12,6 @@ data() {
         }
 	},
 	props: {
-        "titleBtn":{
-            type: String,
-        },
-        "classButton":{
-            type: String,
-        },
-        "typeBtn":{
-            type:String,
-        }
     },
 	computed: {
 	},
@@ -114,27 +107,26 @@ data() {
     border-radius: 5px;
     box-sizing: border-box;
     padding: 0 10px;
-    margin-top: 5px;
     @include font('Roboto', 13px, 16px, 400, $text);
-    &_opened{
+}    
+    .opened{
         border: 1px solid $text;
         background-color: $label-text;
     }
-    &_inProgress{
+    .inProgress{
         border: 1px solid #846F00;
         background-color: #FFC700;
         color: #846F00;
     }
-    &_complete{
+    .complete{
         border: 1px solid #157536;
         color: #157536;
         background-color: #4BD379;
     }
-    &_error{
+    .error{
         border: 1px solid #6D1313;
         color: #6D1313;
         background-color:#EB4F4F;
     }
-}    
 
 </style>

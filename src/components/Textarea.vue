@@ -1,5 +1,6 @@
 <template>
-    <label class="label" :class="classTextarea">Комментарии()
+    <label class="label">
+        <slot></slot>
         <textarea type="text" class="textarea"  :placeholder="placeholder" :value = "value" v-on:input="onInput"/> 
     </label>
 </template>
@@ -63,13 +64,15 @@ export default {
     }
 }
 .comment{
-    width: 458px;
+    width: 100%;
+    max-width: 458px;
     & .textarea{
     height: 76px;
     }
 }
 .task-edit{
-    width: 400px;
+    width: 100%;
+    max-width: 400px;
     & .textarea{
     height: 528px;
     }

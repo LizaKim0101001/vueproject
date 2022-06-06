@@ -1,16 +1,16 @@
 <template>
     <div class="dropdown_wrapper">
-        <div class="dropdown_button" :class="{'dropdown_button-open': isActive}" @click="toggle">
-
+        <div @click="toggle" >
+            <slot name="header" ></slot>
+            <div v-if="button" class="dropdown_button" :class="{'dropdown_button-open': isActive}"></div>
         </div>
         <div class="dropdown_menu" v-if="isActive">
-            <slot></slot>
+            <slot name="list"></slot>
         </div>
     </div>
 </template>
 
 <script>
-import Select from './Select.vue'
 export default {
     data() {
         return {
@@ -18,6 +18,9 @@ export default {
         };
     },
     props: {
+        "button":{
+            type: String,
+        }
     },
     computed: {},
     mounted() {
@@ -27,8 +30,8 @@ export default {
             this.isActive = !this.isActive
         }
     },
-    components: { Select }
 }
+//:class="{'dropdown_button-open': isActive}"
 </script>
 
 <style lang="scss" scoped>
@@ -54,7 +57,7 @@ export default {
         &_menu{
             position: absolute;
             padding: 5px;
-            width: 105px;
+            width: 100%;
             z-index: 10;
             top: 20px;
             left: 0px;
@@ -78,5 +81,12 @@ export default {
             color: $error;
             }
         }
+        }
+        .head{
+            width: 136px;
+            & .dropdown_menu{
+                top: 40px;
+                right: 0px;
+            }
         }
 </style>

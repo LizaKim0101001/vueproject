@@ -1,7 +1,7 @@
 <template>
     <label class="label">
-        <input type="checkbox" class="checkbox" :checked="isChecked" :value="value" @change="updateInput"/>
-        {{text}}
+        <input :name="name" type="checkbox" class="checkbox" :value="value" v-on:change="chek">
+        <slot></slot>
     </label>
 </template>
 
@@ -9,29 +9,30 @@
 export default {
 	data() {
         return{
+          isChecked: false
         }
 	},
-  model: {
-    prop: 'modelValue',
-    event: 'change'
-  },
   props: {
-    "text":{ type: String },
-    "value": { type: String },
-    "modelValue": { default: "" },
-    "trueValue": { default: true },
-    "falseValue": { default: false }
-  },
-  computed: {
-    isChecked() {
-      if (this.modelValue instanceof Array) {
-        return this.modelValue.includes(this.value)
-      }
-      return this.modelValue === this.trueValue
+    "value":{
+      type: String
+    },
+    "name":{
+      type: String
     }
   },
+  computed: {
+  },
   methods: {
-    updateInput(event) {
+    chek(e){
+      if (e.target.checked) {
+        this.isChecked = true
+        this.$emit('check', this.isChecked, e.target.value, e.target.name)
+      } else{
+        this.isChecked = false
+        this.$emit('check', this.isChecked, e.target.value, e.target.name)
+      }
+    }
+   /*  updateInput(event) {
       let isChecked = event.target.checked
       if (this.modelValue instanceof Array) {
         let newValue = [...this.modelValue]
@@ -44,7 +45,7 @@ export default {
       } else {
         this.$emit('change', isChecked ? this.trueValue : this.falseValue)
       }
-    }
+    } */
   }
 
 }

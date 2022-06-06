@@ -1,10 +1,10 @@
 <template>
     <div class="select_wrapper"  :class="{'select-open': isActive}">
-        <div class="select_title select_button" @click="toggle">
-            {{titleSelect}}
+        <div class=" select_button" @click="toggle">
+           <slot name="title"></slot>
         </div>
         <div v-if="isActive">
-            <slot></slot>
+            <slot name="list"></slot>
         </div>
     </div>
 </template>
@@ -34,8 +34,8 @@ export default {
 	},
 	methods: {
         toggle(){
-                    this.isActive = !this.isActive
-                }
+            this.isActive = !this.isActive
+        }
 	},
 }
 </script>

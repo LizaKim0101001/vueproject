@@ -1,7 +1,7 @@
 <template>
-    <label for="" class="label" :class="classInput">
-        {{title}}
-        <input :type="type" class="input" :value="value"  v-on:input="onInput">
+    <label for="" class="label" >
+        <slot></slot>
+        <input type="text" class="input" :value="value" :placeholder="placeholder" v-on:input="onInput">
     </label>
 </template>
 
@@ -12,21 +12,12 @@ export default {
         }
 	},
 	props: {
-        "title":{
-            type: String,
-        },
         "placeholder":{
-            type: String,
-        },
-        "type":{
             type: String,
         },
         "value":{
             type: String,
         },
-        "classInput":{
-            type: String,
-        }
     },
 	computed: {
 	},
@@ -66,10 +57,10 @@ export default {
         box-shadow: 0px 0px 2px 2px rgba(123, 97, 255, 0.5);
     }
 }
-.authorize{
+.authorize .input{
     width: 240px;
 }
-.task-list{
+.task{
     width: 527px;
 }
 .task-edit{
