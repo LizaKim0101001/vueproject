@@ -1,45 +1,56 @@
-<template>
-  <section class="task-information">
-                <form class="task-about">
-                    <ul class="task-about_list">
+<template> 
+<div>
+    <section class="card-header">
+        <div class="card-wrapper_left">
+            <h3 class="card-header_title">{{title}}</h3>
+        </div>
+        <div class="card-wrapper">
+            <Button class="button button_primary card-wrapper_btn-primary" type="submit" @click.native="Form">Сохранить</Button>
+            <Button class="button card-wrapper_btn" type="reset">Отмена</Button>
+        </div>
+    </section>
+    <section class="task-information">
+            <form class="task-about">
+                <ul class="task-about_list">
+                    <li class="task-about_item">
+                        <SelectOne :options="typeOptions"  v-model="selectedType">
+                            Тип запроса
+                        </SelectOne>
+                     </li>
                         <li class="task-about_item">
-                            <SelectOne :options="typeOptions"  @select="isType" selected="Выберите исполнителя">
-                                Исполнитель
-                            </SelectOne>
-                        </li>
-                        <li class="task-about_item">
-                            <SelectOne :options="typeOptions"  @select="isType" selected="Выберите тип">
-                                Тип запроса
-                            </SelectOne>
-                        </li>
-                        <li class="task-about_item">
-                            <SelectOne :options="rankOptions"  @select="isRank" selected="Выберите приоритет">
-                                Приоритет
-                            </SelectOne>
-                        </li>
-                    </ul>
-                </form>
-                <p class="task-information_divide"></p>
-                <div class="task-description">
-                    <Input placeholder="Введите название" v-model="this.taskCreateEdit.title">Название</Input>
-                    <Textarea class="task-edit" placeholder="Введите описание" v-model="this.taskCreateEdit.description">Описание</Textarea>
-                </div>
-                <p class="task-information_divide"></p>
-                <div class="task-comment">
-            </div>
-        </section>
+                        <SelectOne :options="usersOptions"   v-model="selectedUser">
+                            Исполнитель
+                        </SelectOne>
+                    </li> 
+                    <li class="task-about_item">
+                        <SelectOne :options="rankOptions" v-model="selectedRank">
+                            Приоритет
+                        </SelectOne>
+                    </li>
+                </ul>
+            </form>
+            <p class="task-information_divide"></p>
+            <div class="task-description">
+                <Input placeholder="Введите название" v-model="taskCreateEdit.title">Название</Input>
+                <Textarea class="task-edit" placeholder="Введите описание" v-model="taskCreateEdit.description">Описание</Textarea>
+             </div>
+            <p class="task-information_divide"></p>
+            <div class="task-comment"></div>
+    </section>
+</div>
 </template>
 
 <script>
 import SelectOne from './SelectOne.vue';
 import Input from './Input.vue';
 import Textarea from './Textarea.vue';
+import {typeOptions, rankOptions, typeEnum, rankEnum} from "../common/const";
+import Button from './Button.vue';
+import { mapGetters, mapActions } from 'vuex'
 
 export default {
     data() {
         return {
-            typeOptions:[{text:"Задача", value:"task"}, {text:"Ошибка", value:"error"}],
-            rankOptions:[{text:"Высокий", value:"high"}, {text:"Средний", value:"mefium"}, {text:"Низкий", value:"low"}],
             taskCreateEdit: {
                     id: "",
                     userId: "",
@@ -48,30 +59,105 @@ export default {
                     description: "",
                     type: "",
                     rank: ""
-                }
+                },
+            usersOptions:[]
+            
         };
     },
     props: {},
     computed: {
+        ...mapGetters('index', ['users', 'userData']),
+
+         typeOptions(){
+            return typeOptions
+        },
+        rankOptions(){
+            return rankOptions
+        },
+        typeEnum(){
+            return typeEnum
+        }, 
+        id(){
+            return this.$route.params.id
+        },
+        title(){
+            if (this.id) {
+                return "Редактировать"
+            } else {
+               return "Сохранить"
+            }
+        },
+        selectedRank(){
+            if (this.id) {
+                return rankEnum[this.taskCreateEdit.rank]
+            } else {
+                return {text:"Выберите приоритет", value: ""}
+            }
+        },
+        selectedType(){
+            if (this.id) {
+                console.log(typeEnum[this.taskCreateEdit.type]);
+                return typeEnum[this.taskCreateEdit.type]
+            } else {
+                return {text:"Выберите тип", value: ""}
+            }
+        },
+        selectedUser(){
+            if (this.id) {
+            return this.usersOptions.find(user => user.value === this.taskCreateEdit.assignedId);
+            } else {
+                return {text:"Выберите исполнителя", value: ""}
+            }
+        },
+
+
+
     },
     mounted() {
+        if (this.id){
+            this.oneTask(this.id)
+            .then((data)=>{
+                this.taskCreateEdit = data
+            })
+        }
+        this.fetchUsers()
+        .then((data)=>{
+            for (let i = 0; i < data.length; i++) {
+                    let obj = {text:data[i].username, value:data[i].id}
+                    this.usersOptions.push(obj)
+            }
+        })
+        console.log(this.usersOptions[0]);
     },
     methods: {
+        ...mapActions('task',[ 'commentWorkTime', 'addEditTask', 'oneTask']),
+        ...mapActions('index',['fetchUsers', ]),
         isType(value){
             this.taskCreateEdit.type = value
         },
         isRank(value){
             this.taskCreateEdit.rank = value
+        },
+        Form(){
+            this.taskCreateEdit.type = this.selectedType.value
+            this.taskCreateEdit.rank = this.selectedRank.value
+            this.taskCreateEdit.assignedId = this.selectedUser.value
+            if (this.id === null || this.id === undefined) {
+                console.log( this.userData);
+                this.taskCreateEdit.userId = this.userData.id
+            }
+            this.addEditTask(this.taskCreateEdit)
         }
     },
     watch:{
 
     },
-    components: { SelectOne, Input, Textarea }
+    components: { SelectOne, Input, Textarea, Button }
 }
 </script>
 
 <style lang="scss" scoped>
+@import "../scss/blocks/card-header.scss";
 .task{
     &-information{
         width: 100%;

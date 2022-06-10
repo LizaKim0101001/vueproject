@@ -1,5 +1,14 @@
 <template>
 <div>
+    <section class="card-header">
+            <div class="card-wrapper_left">
+                <h3 class="card-header_title">{users.oneUser.username}</h3>
+            </div>
+            <div class="card-wrapper">
+                <Button class="button"><div @click="toAdd">Добавить задачу</div></Button>
+                <Button class="button button_primary">Редактировать</Button>
+            </div>
+    </section>
     <section class="profile">
         <div class="task-about">
             <img src={photoUrl} alt="" class="profile_avatar" />

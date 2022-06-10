@@ -1,21 +1,17 @@
 <template>
     <div>
-        <Header :authorized="authorized"/>
             <section className="board">
-                <Boardheader/>
                 <AddEdit/>
             </section>
     </div>
 </template>
 
 <script>
-import Header from '../components/Header.vue';
 import Boardheader from '../components/Boardheader.vue';
 import AddEdit from '../components/AddEdit.vue';
 export default {
     data() {
         return {
-           authorized: true,
         };
     },
     props: {},
@@ -29,7 +25,7 @@ export default {
     watch:{
 
     },
-    components: { Header, Boardheader, AddEdit }
+    components: {Boardheader, AddEdit }
 }
 </script>
 

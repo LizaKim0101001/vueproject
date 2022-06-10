@@ -1,40 +1,39 @@
 <template>
     <section class="table-wrapper">
         <table class="table">
-            <TaskItem1 :taskItem="data" />
+            <TaskItem1 :users="users" :taskItem="item" v-for="item in filteredData" :key="item.id"/>
         </table> 
     </section>
 </template>
 
 <script>
 import TaskItem1 from './TaskItem.vue';
+import { mapGetters, mapActions } from 'vuex'
+
 export default {
     data() {
         return {
-            data: {
-                id: "sdsd",
-                userId: "23iugi",
-                assignedId: "sd7678",
-                title: "task1",
-                description: "skjfhlsfh ksdjhfkjsdhf",
-                type: "task",
-                dateOfCreation: "2022-06-05T12:59:58.859Z",
-                dateOfUpdate: "2022-06-05T12:59:58.859Z",
-                timeInMinutes: 0,
-                status: "opened",
-                rank: "low"
-                }
+            users :[]
             }
             
     },
 
     props: {},
     computed: {
+        ...mapGetters('task', ['filteredData']),
+
     },
     mounted() {
+        this.fetchUsers()
+        .then((data)=>{
+            this.users = data
+        })
     },
     methods: {
-    
+         ...mapActions('task',[ 'filterTasks']),
+         ...mapActions('index',['fetchUsers']),
+
+
     },
     watch:{
 

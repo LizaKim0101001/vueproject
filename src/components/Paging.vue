@@ -12,52 +12,82 @@
 </template>
 
 <script>
+import { mapGetters, mapActions } from 'vuex'
+
 export default {
     data() {
         return {
             userPerPage: 10,
-            arrNumbers: [],
+            filter: {},
         };
     },
     props: {
-        "total": {
-            type: String,
-            default: 10
-        },
-        "currentPage": {
-            type: String,
-            default: "1"
-        },
-        
+        "pathname": String,
     },
     computed: {
+        ...mapGetters('task', ['taskFilter', 'totalTask']),
+        ...mapGetters('index',['userFilter', 'total']),
         firstOfPage() {
-            return (1 + (this.currentPage * this.userPerPage));
+            return (1 + (this.filter.page * this.filter.limit));
         },
         pages(){
-            return Math.ceil(this.total / this.userPerPage);
+            if (this.pathname === "TasksList") {
+                return Math.ceil(this.totalTask / this.filter.limit);
+            }
+             if (this.pathname === "Users"){
+                return Math.ceil(this.total / this.filter.limit);
+             }
         },
         lastOfPage() {
-            if ((this.currentPage + 1) === this.pages) {
+            if ((this.filter.page + 1) === this.pages) {
                 return this.total;
             }
             else {
-                return this.userPerPage * (this.currentPage + 1);
+                return this.filter.limit * (this.filter.page + 1);
             }
         },
-    },
-    mounted() {
 
     },
+    mounted() {
+        if (this.pathname === "Users") {
+            this.filter = this.userFilter
+            this.filterUser(this.filter)
+        }
+        if (this.pathname === "TasksList") {
+            this.filter = this.taskFilter
+            this.filterTasks(this.filter)
+        }
+    },
     methods: {
+         ...mapActions('task',[ 'filterTasks']),
+         ...mapActions('index',['filterUser']),
         nextPage() {
-            this.currentPage = this.currentPage + 1;
+            this.filter.page = this.filter.page + 1;
+            if (this.pathname === "TasksList") {
+                this.filterTasks(this.filter)
+            }
+            if (this.pathname === "Users") {
+                this.filterUser(this.filter)
+            }
         },
         prevPage() {
-            this.currentPage = this.currentPage - 1;
+            this.filter.page = this.filter.page - 1;
+            if (this.pathname === "TasksList") {
+                this.filterTasks(this.filter)
+            }
+            if (this.pathname === "Users") {
+                this.filterUser(this.filter)
+            }
+            
         },
         paginate(item) {
-            this.currentPage = (item - 1);
+            this.filter.page = (item - 1);
+            if (this.pathname === "TasksList") {
+                this.filterTasks(this.filter)
+            }
+            if (this.pathname === "Users") {
+                this.filterUser(this.filter)
+            }
         }
     },
 }

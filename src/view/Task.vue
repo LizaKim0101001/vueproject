@@ -1,25 +1,23 @@
 <template>
     <div>
-        <Header :authorized="authorized"/>
             <section className="board">
-                <Boardheader/>
-                <TaskDescription/>
+                <TaskDescription :id="id"/>
             </section>
     </div>
 </template>
 
 <script>
-import Header from '../components/Header.vue';
-import Boardheader from '../components/Boardheader.vue';
 import TaskDescription from '../components/TaskDescription.vue';
 export default {
     data() {
         return {
-           authorized: true,
         };
     },
     props: {},
     computed: {
+        id(){
+            return this.$route.params.id
+        }
     },
     mounted() {
     },
@@ -29,7 +27,7 @@ export default {
     watch:{
 
     },
-    components: { Header, Boardheader, TaskDescription }
+    components: {TaskDescription }
 }
 </script>
 

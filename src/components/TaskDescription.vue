@@ -1,31 +1,42 @@
 <template>
     <div>
+        <section class="card-header">
+            <div class="card-wrapper_left">
+                <h3 class="card-header_title">{{taskItem.title}}</h3>
+                <Button class="status" :class="taskItem.status">{{statusEnum[taskItem.status].text}}</Button>
+            </div>
+            <div class="card-wrapper">
+                <Button  class="button" v-for="item in statusArray[taskItem.status]" :key="item.status">{{item.text}}</Button>
+                <Button class="button button_primary" ><div @click="toEdit">Редактировать</div> </Button>
+                <Button class="button button_error" >Удалить</Button>
+            </div>
+        </section>
         <section class="task-information">
             <div class="task-about">
                 <ul class="task-about_list">
                     <li class="task-about_item">
                         <p class="task-information_title">Исполнитель</p>
-                        <p class="task-information_text">{executor}</p>
+                        <p class="task-information_text">{{executor}}</p>
                     </li>
                     <li class="task-about_item">
                         <p class="task-information_title">Автор задачи</p>
-                        <p class="task-information_text">{author}</p>
+                        <p class="task-information_text">{{author}}</p>
                     </li>
                     <li class="task-about_item">
                         <p class="task-information_title">Тип запроса</p>
-                        <p class="task-information_text">{taskType}</p>
+                        <p class="task-information_text">{{`${typeEnum[taskItem.type].text}`}}</p>
                     </li>
                     <li class="task-about_item">
                         <p class="task-information_title">Приоритет</p>
-                        <p class="task-information_text">{rankTask}</p>
+                        <p class="task-information_text">{{`${rankEnum[taskItem.rank].text}`}}</p>
                     </li>
                     <li class="task-about_item">
                         <p class="task-information_title">Дата создания</p>
-                        <p class="task-information_text">{dateCreation}</p>
+                        <p class="task-information_text">{{dateOfCreation}}</p>
                     </li>
                     <li class="task-about_item">
                         <p class="task-information_title">Дата изменения</p>
-                        <p class="task-information_text">{dateUpdates}</p>
+                        <p class="task-information_text">{{dateUpdates}}</p>
                     </li>
                     <li class="task-about_item" >
                         <p class="task-information_title">Затрачено времени</p>
@@ -37,27 +48,26 @@
             <div class="task-description">
                 <p class="task-information_title">Описание</p>
                 <p class="task-information_text">
-                {description}
+                {{taskItem.description}}
                 </p>
             </div>
             <div class="task-comment">
                 <form action="" class="task-comment-form" onSubmit={handleSubmit}>
-                    <Textarea placeholder="Текст комментария"  class="comment" v-model="this.comentData.text">Комментарии({totalComment})</Textarea>
-                    <Button type="submit" class="button button_success task-comment_button">Добавить комментарий</Button>
+                    <Textarea placeholder="Текст комментария"  class="comment" v-model="comentForm.text">Комментарии({{totalComments}})</Textarea>
+                    <Button type="submit" class="button button_success task-comment_button" @click.native.prevent="commentAdd">Добавить комментарий</Button>
                 </form>
                 <ul class="task-comment_list">
-                    <div id={id} commentId={allComments.id} authorCommentId={authorCommentId} key={allComments.id} text={allComments.text} userId={allComments.userId}>
+                    <div v-for="item in allComment" :key="item.id">
                         <li class="task-comment_item">
                             <div>
-                                <p class="task-information_title">{authorComment}</p>
-                                <p class="task-information_text">{text}</p>
+                                <p class="task-information_title">{{authorComment}}</p>
+                                <p class="task-information_text">{{item.text}}</p>
                             </div>
                                 <p class="task-information_text task-information_delete"  onClick={handelerDeleteComment}>Удалить</p>
                         </li>
                     </div>
                 </ul>
             </div>
-            
         </section>
         <section class="notion-work" v-if="isActive">
             <div class="notion-work_wrapper">
@@ -68,7 +78,7 @@
                             <Input class="modal" v-model="amountOfTime">Затраченное время</Input>
                         </li>
                         <li class="task-about_item">
-                            <SelectOne :options="options" @select="selectTime" selected="Выберите единицу измерения">
+                            <SelectOne :options="timeOptions" @select="selectTime" selected="Выберите единицу измерения">
                                Единица измерения
                             </SelectOne>
                         </li>
@@ -78,8 +88,8 @@
                     </ul>
                 </form>
                 <div class="buttons-wrapper">
-                    <Button type="submit" class="button button_primary notion-work_button"><div v-on:click="subWorkTime">Добавить</div> </Button>
-                    <Button class="button notion-work_button" ><div v-on:click="ol" > Отмена</div></Button>
+                    <Button type="submit" class="button button_primary notion-work_button" v-on:click.native="subWorkTime">Добавить</Button>
+                    <Button class="button notion-work_button" @click.native="ol"> Отмена</Button>
                 </div>
             </div>
         </section>
@@ -91,37 +101,126 @@ import Textarea from './Textarea.vue';
 import Button from './Button.vue';
 import Input from './Input.vue';
 import SelectOne from './SelectOne.vue';
+import {timeOptions} from "../common/const";
+import { mapGetters, mapActions } from 'vuex'
+import {rankEnum, statusArray, statusEnum, typeEnum} from "../common/const";
+
 export default {
     data() {
         return {
             isActive: false,
-            options:[{text:"Минуты", value:"minute"}, {text:"Часы", value:"hour"}, {text:"Дни", value:"day"}],
             selectedTime:"",
             amountOfTime: "",
-            comentData: {
+            comentForm: {
                 id: "",
                 taskId: "",
                 userId: "",
                 text: ""
-            },
-            workTime: {
-                timeInMinutes: "",
+            },  
+                workTime : {
+                timeInMinutes: 0,
                 comment: "",
                 currentUser: ""
-            }     
+		    },
+            taskItem: {},
+            users :[],
+            allComment:[],
+            totalComments: '',
         };
     },
-    props: {},
-    computed: {
-        timeInMinutes(){
-            
+    props: {
+        "id":{
+            type: String
         }
     },
+    computed: {
+        ...mapGetters('index', ['userData']),
+        ...mapGetters('comment', ['allComments']),
+
+        statusEnum(){
+            return statusEnum
+        },
+        rankEnum(){
+            return rankEnum
+        },
+        statusArray(){
+            return statusArray
+        },
+        timeOptions(){
+            return timeOptions
+        },
+        typeEnum(){
+            return typeEnum
+        },
+        author(){
+            if (this.users.find(user => user.id === this.taskItem.userId) === undefined) {
+                return "Не задан"
+            } else {
+                return this.users.find(user => user.id === this.taskItem.userId).username
+            }
+        },
+        executor(){
+            if (this.users.find(user => user.id === this.taskItem.assignedId) === undefined) {
+                return "Не задан"
+            } else {
+                return this.users.find(user => user.id === this.taskItem.assignedId).username
+            }
+        },
+        dateOfCreation(){
+            const arr = this.taskItem.dateOfCreation.split('T');
+            const getDayInfo = function (strng) {
+                let arr = strng.split('-')
+                let allDate = (`${arr[2] + "." + arr[1] + "." +arr[0]}`);
+            return allDate
+            }
+            return getDayInfo(arr[0])
+        },
+        dateUpdates(){
+            if (this.taskItem.dateOfUpdate === null || this.taskItem.dateOfUpdate === undefined) {
+                return "Не редактировалось"
+            } else{
+                const arr = this.taskItem.dateOfUpdate.split('T');
+                const getDayInfo = function (strng) {
+                    let arr = strng.split('-')
+                    let allDate = (`${arr[2] + "." + arr[1] + "." +arr[0]}`);
+                return allDate
+                }
+                return getDayInfo(arr[0])
+            }
+        },
+        authorComment(){
+            if (this.users.find(user => user.id === this.item.userId) === undefined) {
+                return "Не задан"
+            } else {
+                return this.users.find(user => user.id === this.item.userId).username
+            }
+        },
+    },
     mounted() {
+        this.oneTask(this.id)
+        .then((data)=>{
+            this.taskItem = data
+        })
+        this.fetchUsers()
+        .then((data)=>{
+            this.users = data
+        })
+        this.getAll(this.id)
+        .then(({data})=>{
+                this.setComments(data)
+                this.allComment = data
+                this.totalComments = data.length
+        })
+        this.comentForm.userId = this.userData.id
+        this.comentForm.taskId = this.id
+
     },
     methods: {
+         ...mapActions('task',[ 'commentWorkTime', 'oneTask']),
+         ...mapActions('index',['fetchUsers']),
+         ...mapActions('comment',['getAll', 'addEditComment', 'deleteComment','setComments']),
         ol(){
-            this.isActive = !this.isActive
+            this.isActive = !this.isActive 
         },
         selectTime(value){
             this.selectedTime = value
@@ -137,7 +236,15 @@ export default {
             if (this.selectedTime === "minute") {
                 this.workTime.timeInMinutes=this.amountOfTime
             }
+
             this.isActive = !this.isActive
+        },
+        toEdit(){
+            const id = this.id
+            this.$router.push({name: "TaskEdit", params:{id}})
+        },
+        commentAdd(){
+            this.addEditComment(this.comentForm)
         }
     },
     watch:{
@@ -302,5 +409,53 @@ export default {
 }
 .erase{
     text-decoration: none;
+}
+.card{
+    &-header{
+        margin-bottom: 20px;
+        width: 100%;
+        max-width: 1280px;
+        box-sizing: border-box;
+        @include flex(flex, row, space-between, flex-start, no-wrap);
+        &_title{
+            @include font("Roboto", 24px, 28px, 300, $text);
+            margin-right: 10px;
+            max-width: 60%;
+            margin-right: 10px;
+        }
+        & .status{
+            width: 78px;
+        }
+        & .button_primary{
+            width: 169px;
+        }
+    }
+    &-wrapper{
+        margin-top: 5px;
+        @include flex(flex, row, space-between, center, no-wrap);
+        & .button{
+           padding: 2px 10px;
+            margin-right: 10px;
+            &:last-of-type{
+                margin-right: 0;
+            }
+            &.button_primary{
+                width: 155px;
+            }
+            &.button_error{
+                width:103px;
+            }
+        }
+        &_left{
+            width: 66.5%;
+            @include flex(flex, row, flex-start, flex-start, no-wrap);
+        }
+        & .card-wrapper_btn{
+            width: 98px;
+            &-primary{
+            width: 228px;
+            }
+        }
+    }
 }
 </style>

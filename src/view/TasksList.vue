@@ -1,40 +1,31 @@
 <template>
     <div>
-        <Header :authorized="authorized"/>
             <section className="board">
                 <Boardheader/>
                 <Form/>
                 <TaskListBoard/>
-                <Paging currentPage="0" total="1"/>
+                <Paging pathname="TasksList"/>
             </section>
     </div>
 </template>
 
 <script>
-import Header from '../components/Header.vue';
 import Boardheader from '../components/Boardheader.vue';
 import Form from '../components/Form.vue';
 import TaskListBoard from '../components/TaskListBoard.vue';
 import Paging from '../components/Paging.vue';
+
 export default {
     data() {
         return {
-           authorized: true,
-           total: 1,
         };
     },
     props: {},
-    computed: {
-    },
-    mounted() {
-    },
-    methods: {
-    
-    },
+
     watch:{
 
     },
-    components: { Header, Boardheader, Form, TaskListBoard, Paging }
+    components: { Boardheader, Form, TaskListBoard, Paging }
 }
 </script>
 

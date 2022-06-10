@@ -24,24 +24,8 @@
             <Button class="button card-wrapper_btn">Отмена</Button>
         </div>
     </section>
-    <section class="card-header" v-show="this.pathname===this.path.TaskAdd">
-        <div class="card-wrapper_left">
-            <h3 class="card-header_title">Сохранить</h3>
-        </div>
-        <div class="card-wrapper">
-            <Button class="button button_primary card-wrapper_btn-primary" onClick={handlerSaveEdit}>Сохранить</Button>
-            <Button class="button card-wrapper_btn">Отмена</Button>
-        </div>
-    </section>
-    <section class="card-header" v-show="this.pathname===this.path.Profile">
-            <div class="card-wrapper_left">
-                <h3 class="card-header_title">{users.oneUser.username}</h3>
-            </div>
-            <div class="card-wrapper">
-                <Button class="button"><div @click="toAdd">Добавить задачу</div></Button>
-                <Button class="button button_primary">Редактировать</Button>
-            </div>
-    </section>
+   
+    
     <section class="card-header" v-show="this.pathname===this.path.Users">
             <div class="card-wrapper_left">
                 <h3 class="card-header_title">Пользователи</h3>
@@ -78,7 +62,6 @@ export default {
             this.$router.push({name: "TaskAdd"})
         },
         toEdit(){
-            console.log(`/edit/${this.$route.params.id}`);
             this.$router.push({path: `/edit/${this.$route.params.id}`})
         } 
     },

@@ -1,17 +1,18 @@
 <template>
     <div>
-        <Header :authorized="authorized"/>
             <section className="board">
                 <Boardheader/>
                 <UserList/>
+                <Paging pathname="Users"/>
             </section>
     </div>
 </template>
 
 <script>
-import Header from '../components/Header.vue';
 import Boardheader from '../components/Boardheader.vue';
 import UserList from '../components/UserList.vue';
+import Paging from '../components/Paging.vue';
+
 export default {
     data() {
         return {
@@ -22,14 +23,15 @@ export default {
     computed: {
     },
     mounted() {
-    },
-    methods: {
-    
-    },
-    watch:{
 
     },
-    components: { Header, Boardheader, UserList }
+    methods: {
+        toProfile(user){
+            this.$router.push({path:`/profile/${user.id}`})
+        },
+},
+    
+    components: { Boardheader, UserList, Paging }
 }
 </script>
 

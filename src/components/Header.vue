@@ -11,13 +11,13 @@
                 <Dropdown  class="head"  >
                     <template v-slot:header>
                         <div class="user-profile" >
-                            <p class="user-profile_name" >{{username}}</p>
-                            <img src="../assets/images/UserPhoto.png" class="user-profile_img" alt="аватар пользователя" />
+                            <p class="user-profile_name" >{{userData.username}}</p>
+                            <img :src="userData.photoUrl" class="user-profile_img" alt="аватар пользователя" />
                         </div>
                     </template>
                     <template v-slot:list>
                         <button class="dropdown-item">Просмотреть профиль</button>
-                        <button class="dropdown-item dropdown-item_er">Выйти из системы</button>
+                        <button class="dropdown-item dropdown-item_er" @click="logoutUser">Выйти из системы</button>
                     </template>
                 </Dropdown>
             </div>
@@ -31,32 +31,37 @@
 
   <script>
 import Dropdown from './Dropdown.vue';
+import { mapGetters, mapActions } from 'vuex'
+
 export default {
     data() {
         return {
-            username: "Liza Kim",
             authorize:{
                 name: "Authorize"
             }
         };
     },
     props: {
-        "authorized": {
-            type: Boolean,
-        }
     },
-    computed: {},
+    computed: {
+        ...mapGetters('index', ['userData', 'authorized']),
+    },
     mounted() {
     },
     methods: {
+        ...mapActions('index',['logout']),
+
         toggle() {
             this.isActive = !this.isActive;
         },
         toTaskList(){
-            this.$router.push({path: "/list"})
+            this.$router.push({name:"TasksList"})
         },
         toUserList(){
-            this.$router.push({path: "/users"})
+            this.$router.push({name: "Users"})
+        },
+        logoutUser(){
+            this.logout()
         }
     },
     components: { Dropdown }
@@ -111,9 +116,7 @@ export default {
             width: 42px;
             height: 42px;
             border-radius: 50%;
-            background-image: url("../assets/images/UserPhoto.png");
-            background-position: center;
-            background-repeat: no-repeat;
+
         }
     }
     .popup{

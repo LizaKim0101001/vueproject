@@ -1,6 +1,5 @@
 <template>
     <div>
-        <Header :authorized="authorized"/>
             <section className="board">
                 <Boardheader/>
                 <ProfileBoard/>
@@ -9,13 +8,11 @@
 </template>
 
 <script>
-import Header from '../components/Header.vue';
 import Boardheader from '../components/Boardheader.vue';
 import ProfileBoard from '../components/ProfileBoard.vue';
 export default {
     data() {
         return {
-           authorized: true,
            userData:{
                 id: "6273dca5d09b551dca87629c",
                 login: "SPB_Alexey_Kutilov",
@@ -37,7 +34,7 @@ export default {
     watch:{
 
     },
-    components: { Header, Boardheader, ProfileBoard }
+    components: { Boardheader, ProfileBoard }
 }
 </script>
 

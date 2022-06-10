@@ -7,7 +7,7 @@
             <p class="table-cell">{{taskItem.title}} </p>
         </td>
         <td class="table_item table-users"  >
-            <p class="table-cell">{{taskItem.userId}}</p>
+            <p class="table-cell">{{this.authorTask}}</p>
         </td>
         <td class="table_item table-status" >
             <Button class="status" :class="taskItem.status">{{statusEnum[taskItem.status].text}}</Button>
@@ -30,48 +30,58 @@
 <script>
 import Dropdown from './Dropdown.vue';
 import Button from './Button.vue';
+import { mapGetters, mapActions } from 'vuex'
 
+import {rankEnum, statusArray, statusEnum} from "../common/const";
 export default {
     data() {
         return {
-            rankEnum:{
-                low:{text: "Низкий"},
-                medium:{text:"Средний"},
-                high:{text:"Высокий"}
-            },
-            statusArray :{
-                opened:[{status:"inProgress", text:"Взять в работу"}, {status:"complete", text:"Сделано"}], 
-                inProgress:[{status:"opened", text:"Переоткрыть"}, {status:"testing", text:"На тестировании"}, {status:"complete", text:"Сделано"}],
-                testing:[{status:"opened", text:"Переоткрыть"}, {status:"complete", text:"Сделано"}],
-                complete:[{status:"opened", text:"Переоткрыть"}, {status:"complete", text:"Сделано"}],
-            },
-            statusEnum: {
-                opened: {text:"Переоткрыть"},
-                inProgress: {text:"Взять в работу"},
-                testing :{text:"На тестировании"},
-                complete :{text:"Сделано"}
-            }
         };
     },
     props: {
         "taskItem":{
             type: Object,
+        },
+        "users":{
+            type: Array
         }
     },
     computed: {
-        rank(){
-
+       // ...mapGetters('index',['users']),
+        statusEnum(){
+            return statusEnum
+        },
+        rankEnum(){
+            return rankEnum
+        },
+        statusArray(){
+            return statusArray
+        },
+        authorTask(){
+        if (this.users.find(user => user.id === this.taskItem.assignedId) === undefined) {
+            return "Не задан"
+        } else {
+            return this.users.find(user => user.id === this.taskItem.assignedId).username
         }
+            },
     },
     mounted() {
+        this.fetchUsers()
+        .then((data)=>{
+            this.users = data
+        })
         },
     methods: {
+         ...mapActions('index',['fetchUsers']),
+
         toEdit(){
-            this.$router.push({name:"TaskEdit", path: `/edit/${this.taskItem.id}` })
+            const id = this.taskItem.id
+            this.$router.push({name:"TaskEdit", params: {id} })
         },
         toTask(){
-            this.$router.push({path: `/task/${this.taskItem.id}` })
-        }
+            const id = this.taskItem.id
+            this.$router.push({name:"Task", params: {id}})
+        },
     },
     watch:{
 
