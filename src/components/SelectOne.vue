@@ -1,8 +1,9 @@
+
 <template>
     <div>
         <p class="select_title"><slot></slot></p>
-        <div class="select" :class="{'select-open': isActive}">
-            <p class="select-default select-text" @click="toggle">{{this.select}}</p>
+        <div class="select" :class="{'select-open': isActive}" @click="toggle">
+            <p class="select-default select-text"  :value="value.value">{{value.text}}</p>
             <p
             v-for="option in options"
             class="select-option select-text"
@@ -21,31 +22,28 @@ export default {
     data() {
         return{
             isActive: false,
-            select: ""
         }
 	},
 	props: {
         "options":{
             type: Array,
         },
-        "selected":{
-            type: String,
-            default: "",
+        "value":{
+            type: Object,
         }
     },
 	computed: {
         
 	},
 	mounted() {
-        this.select = this.selected
         },
 	methods: {
         toggle(){
             this.isActive = !this.isActive
         },
         isSelected(option){
-            this.select = option.text
-            this.$emit("select", option.value);
+            this.value.text = option.text
+            this.value.value = option.value
             this.isActive = !this.isActive
         }
 	},

@@ -1,26 +1,28 @@
   <template>
     <div>
-        <Header :authorized="authorized"/>
         <Authorizemodal/>
     </div>
   </template>
 
   <script>
-import Header from "../components/Header.vue";
 import Authorizemodal from "../components/Authorizemodal.vue";
+import { mapGetters, mapActions } from 'vuex'
 
 export default {
     data() {
         return {
-            authorized: false,
+          authorized: false,
         };
     },
     props: {},
     computed: {},
     mounted() {
     },
-    methods: {},
-    components: { Header, Authorizemodal }
+    methods: {
+         ...mapActions('index',['fetchUsers']),
+
+    },
+    components: {Authorizemodal }
 }
 </script>
 

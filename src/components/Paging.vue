@@ -12,52 +12,78 @@
 </template>
 
 <script>
+import { mapGetters, mapActions } from 'vuex'
+
 export default {
     data() {
         return {
             userPerPage: 10,
-            arrNumbers: [],
         };
     },
     props: {
-        "total": {
-            type: String,
-            default: 10
+        "pathname": String,
+        "filter": {
+            type: Object
         },
-        "currentPage": {
-            type: String,
-            default: "1"
-        },
-        
+        "total":{
+            type: Number
+        }
     },
     computed: {
+        ...mapGetters('index',['userFilter',]),
         firstOfPage() {
-            return (1 + (this.currentPage * this.userPerPage));
+            return (1 + (this.filter.page * this.filter.limit));
         },
         pages(){
-            return Math.ceil(this.total / this.userPerPage);
+            if (this.pathname === "TasksList") {
+                return Math.ceil(this.total / this.filter.limit);
+            }
+             if (this.pathname === "Users"){
+                return Math.ceil(this.total / this.filter.limit);
+             }
         },
         lastOfPage() {
-            if ((this.currentPage + 1) === this.pages) {
+            if ((this.filter.page + 1) === this.pages) {
                 return this.total;
             }
             else {
-                return this.userPerPage * (this.currentPage + 1);
+                return this.filter.limit * (this.filter.page + 1);
             }
         },
-    },
-    mounted() {
 
     },
+    mounted() {
+    },
     methods: {
+         ...mapActions('task',[ 'filterTasks', 'setFilter']),
+         ...mapActions('index',['filterUser']),
         nextPage() {
-            this.currentPage = this.currentPage + 1;
+            this.filter.page = this.filter.page + 1;
+            if (this.pathname === "TasksList") {
+                this.$emit('pag', this.filter.page)
+            }
+            if (this.pathname === "Users") {
+                this.$emit('pag', this.filter.page)
+            }
         },
         prevPage() {
-            this.currentPage = this.currentPage - 1;
+            this.filter.page = this.filter.page - 1;
+            if (this.pathname === "TasksList") {
+            this.$emit('pag', this.filter.page)
+            }
+            if (this.pathname === "Users") {
+                this.$emit('pag', this.filter.page)
+            }
+            
         },
         paginate(item) {
-            this.currentPage = (item - 1);
+            this.filter.page = (item - 1);
+            if (this.pathname === "TasksList") {
+                this.$emit('pag', this.filter.page)
+            }
+            if (this.pathname === "Users") {
+                this.$emit('pag', this.filter.page)
+            }
         }
     },
 }
@@ -69,6 +95,9 @@ export default {
     margin-top: 20px;
     @include flex (flex, row, space-between, center, nowrap);
     width: 100%;
+    max-width: 1280px;
+    margin-left: auto;
+    margin-right: auto;
 &_wrapper{
     width: 50%;
     height: 24px;

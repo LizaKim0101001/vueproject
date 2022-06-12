@@ -107,6 +107,8 @@ data() {
     border-radius: 5px;
     box-sizing: border-box;
     padding: 0 10px;
+    width: 100%;
+    max-width: 120px;
     @include font('Roboto', 13px, 16px, 400, $text);
 }    
     .opened{
@@ -114,6 +116,11 @@ data() {
         background-color: $label-text;
     }
     .inProgress{
+        border: 1px solid #846F00;
+        background-color: #FFC700;
+        color: #846F00;
+    }
+    .testing{
         border: 1px solid #846F00;
         background-color: #FFC700;
         color: #846F00;

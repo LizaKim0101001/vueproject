@@ -1,30 +1,33 @@
 <template>
     <div>
+        <Header authorized=""/>
         <router-view></router-view>
     </div>
 </template>
 
 <script>
+import Header from './components/Header.vue';
 
 export default {
     data() {
         return {
-            link1: {
-                path: "/authorize",
-			},
-            titleBtn: "Открыть",
-            currentPage: 0,
-            vev: [],
+            authorized:true,
         };
     },
-    computed: {},
+    computed: {
+
+
+    },
     mounted() {
+
+
     },
     methods: {
+
     },
     watch:{
     },
-    components: {}
+    components: { Header }
 }
 /*
 		            

@@ -1,5 +1,11 @@
 <template>
     <div>
+        <section class="card-header">
+            <div class="card-header_wrapper">
+                <h3 class="card-header_title">Задачи</h3>
+                <Button class="button button_primary"><div @click="toAdd">Добавить задачу</div> </Button>
+            </div>
+        </section>
         <section class="task-list">
             <form action=""  class="form-task-list" @submit.prevent="sub">
                 <div class="task-list_list">
@@ -14,8 +20,7 @@
                         <Select class="task-list_item users">
                             <template v-slot:title>Пользователи</template>
                             <template v-slot:list>
-                                <Checkbox name="assignedUsers" value="userid" @check="isCheked">Задача</Checkbox>
-                                <Checkbox name="assignedUsers" value="userid1" @check="isCheked">Ошибка</Checkbox>
+                                <Checkbox name="assignedUsers" :value="user.id" @check="isCheked" v-for="user in users" :key="user.id">{{user.username}}</Checkbox>
                             </template>
                         </Select>
                         <Select class="task-list_item status">
@@ -48,32 +53,30 @@ import Checkbox from './Checkbox.vue';
 import Select from './Select.vue';
 import Input from './Input.vue';
 import Button from './Button.vue';
+import { mapGetters, mapActions } from 'vuex'
+
 export default {
     data() {
         return {
            authorized: true,
-           taskFilter:{
-                filter: {
-                    query: "",
-                    assignedUsers: [],
-                    userIds: [],
-                    type: [],
-                    status: [],
-                    rank: []
-                },
-                page: 0,
-                limit: 0
-                }
         };
     },
-    props: {},
+    props: {
+        "taskFilter":{
+            type: Object
+        }
+    },
     computed: {
+        ...mapGetters('index',['users',]),
+
     },
     mounted() {
     },
     methods: {
+        ...mapActions('task',[ 'filterTasks']),
+
         sub(){
-            console.log(this.taskFilter.filter);
+            this.$emit('sub', this.taskFilter)
         },
         isCheked(check, value, name){
             let filterItem =  this.taskFilter.filter[name]
@@ -84,6 +87,9 @@ export default {
                 filterItem.splice(index, 1)
             }
         },
+        toAdd(){
+            this.$router.push({name: "TaskAdd"})
+        },
     },
     watch:{
     },
@@ -92,11 +98,16 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+@import "../scss/blocks/card-header.scss";
 .task-list{
     width: 100%;
     max-width: 1280px;
-    padding: 20px;
+    padding-bottom: 20px;
+    box-sizing: border-box;
+    margin-left: auto;
+    margin-right: auto;
     &_list{
+    width: 100%;
         height: 34px;
         box-sizing: border-box;
         position: relative;
@@ -120,9 +131,6 @@ export default {
             margin-bottom: 5px;
         }
     }
-}
-.form-task-list .task-list_item{
-    background-color: $white;
 }
 .type{
     width: 100%;
@@ -153,4 +161,5 @@ export default {
 .erase{
     text-decoration: none;
 }
+
 </style>

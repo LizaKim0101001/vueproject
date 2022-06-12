@@ -1,52 +1,77 @@
 <template>
     <div>
-        <Header :authorized="authorized"/>
-            <section className="board">
-                <Boardheader/>
-                <Form/>
+            <section clas="board">
+                <Form :taskFilter="taskFilter" @sub="sub"/>
                 <TaskListBoard/>
-                <Paging currentPage="0" total="1"/>
+                <Paging 
+                :total="total" 
+                pathname="TasksList" 
+                :filter="taskFilter" 
+                @pag="pag"/>
             </section>
     </div>
 </template>
 
 <script>
-import Header from '../components/Header.vue';
 import Boardheader from '../components/Boardheader.vue';
 import Form from '../components/Form.vue';
 import TaskListBoard from '../components/TaskListBoard.vue';
 import Paging from '../components/Paging.vue';
+import { mapGetters, mapActions } from 'vuex'
+
 export default {
     data() {
         return {
-           authorized: true,
-           total: 1,
+            taskFilter:{
+                filter: {
+                    query: "",
+                    assignedUsers: [],
+                    userIds: [],
+                    type: [],
+                    status: [],
+                    rank: []
+                },
+                page: 0,
+                limit: 10
+                },
+            total:'',
         };
     },
-    props: {},
-    computed: {
+   computed: {
     },
-    mounted() {
-    },
-    methods: {
-    
+        mounted() {
+
+        this.filterTasks(this.taskFilter)
+        .then((data)=>{
+            this.total = data.total
+        })
     },
     watch:{
-
     },
-    components: { Header, Boardheader, Form, TaskListBoard, Paging }
+    methods: {
+         ...mapActions('task',[ 'filterTasks']),
+        toProfile(user){
+            this.$router.push({path:`/profile/${user.id}`})
+        },
+         sub(value){
+            this.taskFilter = value
+            this.filterTasks(this.taskFilter)
+            .then((data)=>{
+                this.total = data.total
+            })
+        },
+        pag(value){
+            this.taskFilter.page = value
+            this.filterTasks(this.taskFilter)
+            .then((data)=>{
+                this.total = data.total
+            })
+        }
+    },
+    components: { Boardheader, Form, TaskListBoard, Paging }
 }
 </script>
 
 <style lang="scss" scoped>
-.board{
-    width: 100%;
-    max-width: 1280px;
-    padding: 30px 80px;
-    box-sizing: border-box;
-    @include flex(flex, column, center, center, no-wrap);
-}
-.erase{
-    text-decoration: none;
-}
+@import "../scss/blocks/board.scss";
 </style>
