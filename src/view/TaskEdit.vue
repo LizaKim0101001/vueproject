@@ -1,6 +1,6 @@
 <template>
     <div>
-            <section className="board">
+            <section class="board">
                 <AddEdit/>
             </section>
     </div>
@@ -9,6 +9,7 @@
 <script>
 import Boardheader from '../components/Boardheader.vue';
 import AddEdit from '../components/AddEdit.vue';
+import { mapGetters, mapActions } from 'vuex'
 export default {
     data() {
         return {
@@ -16,11 +17,14 @@ export default {
     },
     props: {},
     computed: {
+
     },
     mounted() {
     },
     methods: {
-    
+        toProfile(user){
+            this.$router.push({path:`/profile/${user.id}`})
+        },
     },
     watch:{
 
@@ -30,14 +34,6 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.board{
-    width: 100%;
-    max-width: 1280px;
-    padding: 30px 80px;
-    box-sizing: border-box;
-    @include flex(flex, column, center, center, no-wrap);
-}
-.erase{
-    text-decoration: none;
-}
+@import "../scss/blocks/board.scss";
+
 </style>

@@ -3,8 +3,8 @@
         <div class="authorize_wrapper">
             <h2 class="authorize_title">Авторизация</h2>
             <form action="" class="authorize_form" >
-                <Input  class="authorize_input" placeholder="login" v-model="data.login">Логин</Input>
-                <Input  class="authorize_input" placeholder="********"  v-model="data.password">Пароль</Input>
+                <Input  class="authorize_input" placeholder="login" v-model="loginData.login">Логин</Input>
+                <Input  class="authorize_input" placeholder="********"  v-model="loginData.password">Пароль</Input>
                 <router-link class="erase" :to="tasks">
                     <Button type="submit" class="authorize_btn button_success" v-on:click.prevent.native="sub" >Вход</Button>
                 </router-link> 
@@ -21,23 +21,33 @@ import { mapGetters, mapActions } from 'vuex'
 export default {
     data() {
         return {
-            data:{login:"Sloth123", password:"123"},
+            
             tasks:{
                 name: "TasksList"
-            }
+            },
+            loginData:{login:"", password:"",}
         };
     },
-    props: {},
-    computed: {
-        ...mapGetters('index',['loginData', 'userData']),
+    computed:{
     },
     mounted() {
-        //this.data = this.loginData
+    },
+    watch:{
     },
     methods: {
          ...mapActions('index',['login']),
         sub(){
-            this.login(this.data)
+            localStorage.login = this.loginData.login
+            localStorage.password = this.loginData.password
+            this.login(this.loginData)
+            .then((data)=>{
+                console.log(data.data);
+                if (data.status === 200) {
+                    localStorage.authorized = true
+                } else {
+                    localStorage.authorized = false
+                }
+            })
             this.$router.push({name:"TasksList"})
         }
     },

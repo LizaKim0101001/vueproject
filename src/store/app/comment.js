@@ -2,6 +2,7 @@ import api from '@/api'
 
 export const mutation = {
     SET_ALL_COMMENTS: 'SET_ALL_COMMENTS',
+    SET_TOTAL_COMMENTS: 'SET_TOTAL_COMMENTS'
 }
 
 export default {
@@ -14,32 +15,32 @@ export default {
         userId: "",
         text: ""
         },
+        totalComments: ''
 	},
 
 	getters: {
 		allComments: state => state.allComments,
+        totalComments: state => state.totalComments
 	},
 
 	mutations: {
 		[mutation.SET_ALL_COMMENTS]:(state, data)=>{
 			state.allComments = data
 		},
+        [mutation.SET_TOTAL_COMMENTS]:(state, data)=>{
+            state.totalComments = data
+        }
 
 },
 
 	actions: {
         getAll:({commit},id)=>{
-            return api.Comment.getAllComments(id)
+            api.Comment.getAllComments(id)
+            .then(({data})=>{
+                commit(mutation.SET_ALL_COMMENTS, data)
+                commit(mutation.SET_TOTAL_COMMENTS, data.length)
+            })
         },
-        setComments:({commit}, data)=>{
-            commit(mutation.SET_ALL_COMMENTS, data)
-        },
-        addEditComment:(body)=>{
-            api.Comment.createEditComments(body)
-        },
-        deleteComment:(id)=>{
-            api.Comment.deleteComments(id)
-        }
 /* 		filterTasks:({commit}, value)=>{
 			commit(mutation.SET_TASK_FILTER, value)
 			api.Task.getFilterTasks(value)

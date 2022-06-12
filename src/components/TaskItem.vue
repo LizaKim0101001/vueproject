@@ -19,8 +19,8 @@
             <Dropdown class="table-cell" button="true">
                 <template v-slot:list>
                     <button class="dropdown-item" @click="toEdit">Редактировать</button>
-                    <button class="dropdown-item dropdown-item_er" >Удалить</button>
-                    <button class="dropdown-item" v-for="item in statusArray[taskItem.status]" :key="item.status">{{item.text}}</button>
+                    <button class="dropdown-item dropdown-item_er" @click="del">Удалить</button>
+                    <button class="dropdown-item" v-for="item in statusArray[taskItem.status]" :key="item.status" :id="item.status" @click="setSatus">{{item.text}}</button>
                 </template>
             </Dropdown>
         </td>
@@ -31,7 +31,7 @@
 import Dropdown from './Dropdown.vue';
 import Button from './Button.vue';
 import { mapGetters, mapActions } from 'vuex'
-
+import api from '@/api'
 import {rankEnum, statusArray, statusEnum} from "../common/const";
 export default {
     data() {
@@ -42,12 +42,11 @@ export default {
         "taskItem":{
             type: Object,
         },
-        "users":{
-            type: Array
-        }
     },
     computed: {
-       // ...mapGetters('index',['users']),
+        ...mapGetters('index',['users']),
+        ...mapGetters('task',['taskFilter']),
+
         statusEnum(){
             return statusEnum
         },
@@ -67,21 +66,34 @@ export default {
     },
     mounted() {
         this.fetchUsers()
-        .then((data)=>{
-            this.users = data
-        })
         },
     methods: {
          ...mapActions('index',['fetchUsers']),
+         ...mapActions('task',['oneTask', 'filterTasks']),
+         ...mapActions('comment',['getAll',]),
+
 
         toEdit(){
-            const id = this.taskItem.id
+            const id = this.taskItem.id 
+            this.oneTask(id)
             this.$router.push({name:"TaskEdit", params: {id} })
         },
         toTask(){
             const id = this.taskItem.id
+            this.oneTask(id)
+            this.getAll(id)
             this.$router.push({name:"Task", params: {id}})
         },
+        setSatus(e){
+            console.log();
+            api.Task.changeStatus(this.taskItem.id, e.target.id)
+            //this.oneTask(this.id) 
+        },
+        del(){
+            const id = this.taskItem.id
+            api.Task.deleteTask(id)
+            this.filterTasks(this.taskFilter)
+        }
     },
     watch:{
 
@@ -91,101 +103,9 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.table{
-    &_list{
-        width: 100%;
-        height: 68px;
-        @include flex(flex, row, space-between, flex-start, no-wrap);
-        padding: 0 30px;
-    }
-    &_list:nth-child(2n){
-        background-color: #F2F2F2;
-    }
-    &_item{
-        display: block;
-        padding: 22px 0;
-    }
-   
-    &-edit{
-        width: 100%;
-        max-width: 95px;
-        position: relative;
-    }
-    &-name-task{
-        width: 100%;
-        max-width: 527px;
-    }
-    &-users{
-        width: 100%;
-        max-width:180px;
-    }
-    &-priority{
-        max-width: 120px;
-        width: 100%;
-        & .table-cell{
-            position: relative;
-            padding-left: 30px;
-        }}
-        .hight::after{
-            content: "";
-            top: 6px;
-            left: 12px;
-            width: 14px;
-            height: 8px;
-            position: absolute;
-            box-sizing: border-box;
-            background-image: url("../assets/images/hight.svg");
-            background-repeat: no-repeat;
-        }
-        .medium::after{
-            content: "";
-            top: 7px;
-            left: 12px;
-            width: 14px;
-            height: 6px;
-            position: absolute;
-            box-sizing: border-box;
-            background-image: url("../assets/images/medium.svg");
-            background-repeat: no-repeat;
-        }
-        .low::after{
-            content: "";
-            top: 6px;
-            left: 12px;
-            width: 14px;
-            height: 8px;
-            position: absolute;
-            box-sizing: border-box;
-            background-image: url("../assets/images/low.svg");
-            background-repeat: no-repeat;
-        }
-    
-}
- .type{
-        width: 100%;
-        max-width: 68px;
-        height: 24px;
-        & .bug{
-            width: 24px;
-            height: 24px;
-            background-size: 24px 24px;
-            background-repeat: no-repeat;
-            background-position: center;
-            background-image: url("../assets/images/error.svg");
-        }
-        & .task{            
-            width: 24px;
-            height: 24px;
-            background-size: 24px 24px;
-            background-repeat: no-repeat;
-            background-position: center;
-            background-image: url("../assets/images/task.svg");
-        }
-    }
+@import "../scss/blocks/table.scss";
 
 
 
-.erase{
-    text-decoration: none;
-}
+
 </style>

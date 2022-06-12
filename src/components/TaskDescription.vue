@@ -2,12 +2,12 @@
     <div>
         <section class="card-header">
             <div class="card-wrapper_left">
-                <h3 class="card-header_title">{{taskItem.title}}</h3>
-                <Button class="status" :class="taskItem.status">{{statusEnum[taskItem.status].text}}</Button>
+                <h3 class="card-header_title">{{task.title}}</h3>
+                <Button class="status" :class="task.status">{{statusEnum[task.status].text}}</Button>
             </div>
             <div class="card-wrapper">
-                <Button  class="button" v-for="item in statusArray[taskItem.status]" :key="item.status">{{item.text}}</Button>
-                <Button class="button button_primary" ><div @click="toEdit">Редактировать</div> </Button>
+                <Button  class="button" v-for="item in statusArray[task.status]" :key="item.status" :id="item.status" @click.native="status">{{item.text}}</Button>
+                <Button class="button button_primary" @click.native="toEdit">Редактировать</Button>
                 <Button class="button button_error" >Удалить</Button>
             </div>
         </section>
@@ -24,11 +24,11 @@
                     </li>
                     <li class="task-about_item">
                         <p class="task-information_title">Тип запроса</p>
-                        <p class="task-information_text">{{`${typeEnum[taskItem.type].text}`}}</p>
+                        <p class="task-information_text">{{`${typeEnum[task.type].text}`}}</p>
                     </li>
                     <li class="task-about_item">
                         <p class="task-information_title">Приоритет</p>
-                        <p class="task-information_text">{{`${rankEnum[taskItem.rank].text}`}}</p>
+                        <p class="task-information_text">{{`${rankEnum[task.rank].text}`}}</p>
                     </li>
                     <li class="task-about_item">
                         <p class="task-information_title">Дата создания</p>
@@ -40,7 +40,7 @@
                     </li>
                     <li class="task-about_item" >
                         <p class="task-information_title">Затрачено времени</p>
-                        <p class="task-information_text"></p>
+                        <p class="task-information_text">{{`${days} ${textDays}, ${hours} ${textHours}, ${min} ${textMin}`}}</p>
                     </li>
                 </ul>
                 <Button class="task-about_button button button_primary"> <div v-on:click="ol">Сделать запись о работе </div> </Button>
@@ -48,7 +48,7 @@
             <div class="task-description">
                 <p class="task-information_title">Описание</p>
                 <p class="task-information_text">
-                {{taskItem.description}}
+                {{task.description}}
                 </p>
             </div>
             <div class="task-comment">
@@ -57,15 +57,8 @@
                     <Button type="submit" class="button button_success task-comment_button" @click.native.prevent="commentAdd">Добавить комментарий</Button>
                 </form>
                 <ul class="task-comment_list">
-                    <div v-for="item in allComment" :key="item.id">
-                        <li class="task-comment_item">
-                            <div>
-                                <p class="task-information_title">{{authorComment}}</p>
-                                <p class="task-information_text">{{item.text}}</p>
-                            </div>
-                                <p class="task-information_text task-information_delete"  onClick={handelerDeleteComment}>Удалить</p>
-                        </li>
-                    </div>
+                        <Comment v-for="item in allComments"  :key="item.id" :itemData="item" :id="id">
+                        </Comment>
                 </ul>
             </div>
         </section>
@@ -78,7 +71,7 @@
                             <Input class="modal" v-model="amountOfTime">Затраченное время</Input>
                         </li>
                         <li class="task-about_item">
-                            <SelectOne :options="timeOptions" @select="selectTime" selected="Выберите единицу измерения">
+                            <SelectOne :options="timeOptions" v-model="selectedTime">
                                Единица измерения
                             </SelectOne>
                         </li>
@@ -101,15 +94,15 @@ import Textarea from './Textarea.vue';
 import Button from './Button.vue';
 import Input from './Input.vue';
 import SelectOne from './SelectOne.vue';
-import {timeOptions} from "../common/const";
 import { mapGetters, mapActions } from 'vuex'
-import {rankEnum, statusArray, statusEnum, typeEnum} from "../common/const";
-
+import {rankEnum, statusArray, statusEnum, typeEnum, timeOptions} from "../common/const";
+import api from '@/api'
+import Comment from './Comment.vue'
 export default {
     data() {
         return {
             isActive: false,
-            selectedTime:"",
+            selectedTime:{text: 'Выберите время', value: "0"},
             amountOfTime: "",
             comentForm: {
                 id: "",
@@ -122,21 +115,26 @@ export default {
                 comment: "",
                 currentUser: ""
 		    },
-            taskItem: {},
-            users :[],
-            allComment:[],
-            totalComments: '',
+            data:{login:"Sloth123", password:"123"},
+            days :" ",
+            textDays:" ", 
+            hours:" ", 
+            textHours:" " ,
+            min:" ",
+            textMin:" "
+
         };
     },
     props: {
-        "id":{
-            type: String
-        }
     },
     computed: {
-        ...mapGetters('index', ['userData']),
-        ...mapGetters('comment', ['allComments']),
+        ...mapGetters('index', ['userData', 'users','authorized',]),
+        ...mapGetters('task', ['task',]),
 
+        ...mapGetters('comment', ['allComments', 'totalComments']),
+        id(){
+            return this.$route.params.id
+        },
         statusEnum(){
             return statusEnum
         },
@@ -152,22 +150,23 @@ export default {
         typeEnum(){
             return typeEnum
         },
+
         author(){
-            if (this.users.find(user => user.id === this.taskItem.userId) === undefined) {
+            if (this.users.find(user => user.id === this.task.userId) === undefined) {
                 return "Не задан"
             } else {
-                return this.users.find(user => user.id === this.taskItem.userId).username
+                return this.users.find(user => user.id === this.task.userId).username
             }
         },
         executor(){
-            if (this.users.find(user => user.id === this.taskItem.assignedId) === undefined) {
+            if (this.users.find(user => user.id === this.task.assignedId) === undefined) {
                 return "Не задан"
             } else {
-                return this.users.find(user => user.id === this.taskItem.assignedId).username
+                return this.users.find(user => user.id === this.task.assignedId).username
             }
         },
         dateOfCreation(){
-            const arr = this.taskItem.dateOfCreation.split('T');
+            const arr = this.task.dateOfCreation.split('T');
             const getDayInfo = function (strng) {
                 let arr = strng.split('-')
                 let allDate = (`${arr[2] + "." + arr[1] + "." +arr[0]}`);
@@ -176,10 +175,10 @@ export default {
             return getDayInfo(arr[0])
         },
         dateUpdates(){
-            if (this.taskItem.dateOfUpdate === null || this.taskItem.dateOfUpdate === undefined) {
+            if (this.task.dateOfUpdate === null || this.task.dateOfUpdate === undefined) {
                 return "Не редактировалось"
             } else{
-                const arr = this.taskItem.dateOfUpdate.split('T');
+                const arr = this.task.dateOfUpdate.split('T');
                 const getDayInfo = function (strng) {
                     let arr = strng.split('-')
                     let allDate = (`${arr[2] + "." + arr[1] + "." +arr[0]}`);
@@ -188,37 +187,47 @@ export default {
                 return getDayInfo(arr[0])
             }
         },
-        authorComment(){
-            if (this.users.find(user => user.id === this.item.userId) === undefined) {
-                return "Не задан"
-            } else {
-                return this.users.find(user => user.id === this.item.userId).username
-            }
-        },
     },
     mounted() {
         this.oneTask(this.id)
-        .then((data)=>{
-            this.taskItem = data
-        })
         this.fetchUsers()
-        .then((data)=>{
-            this.users = data
-        })
         this.getAll(this.id)
-        .then(({data})=>{
-                this.setComments(data)
-                this.allComment = data
-                this.totalComments = data.length
-        })
-        this.comentForm.userId = this.userData.id
-        this.comentForm.taskId = this.id
-
+        this.login(this.data)
+        this.min = this.task.timeInMinutes % 60 | 0
+        this.hours = this.task.timeInMinutes/60 | 0
+        this.days = 0
+        if (this.hours > 24){
+            this.days = Math.floor(this.hours/24)
+            this.hours = this.hours -24
+        }
+        if (this.min === 1) {
+            this.textMin = "минута"
+        } else {
+            this.textMin = "минут"
+        }
+        if (this.hours === 1) {
+            this.textHours = "час"
+        }
+        if (this.hours >= 2 && this.hours <5) {
+            this.textHours = "часа"
+        }
+        if (this.hours >= 5 || this.hours === 0){
+            this.textHours = "часов"
+        }
+        if (this.days === 1) {
+            this.textDays = "день"
+        } 
+        if (this.days >= 2 && this.days <5) {
+            this.textDays = "дня"
+        }
+        if (this.days >= 5 || this.days === 0){
+            this.textDays = "дней"
+        }
     },
     methods: {
-         ...mapActions('task',[ 'commentWorkTime', 'oneTask']),
-         ...mapActions('index',['fetchUsers']),
-         ...mapActions('comment',['getAll', 'addEditComment', 'deleteComment','setComments']),
+         ...mapActions('task',[ 'commentWorkTime', 'oneTask', 'setStatus']),
+         ...mapActions('index',['fetchUsers', 'login']),
+         ...mapActions('comment',['getAll',]),
         ol(){
             this.isActive = !this.isActive 
         },
@@ -226,31 +235,45 @@ export default {
             this.selectedTime = value
         },
         subWorkTime(){
-            if (this.selectedTime === "hour") {
+            if (this.selectedTime.value === "hour") {
                 this.workTime.timeInMinutes = this.amountOfTime * 60
             }
-            if (this.selectedTime === "day") {
+            if (this.selectedTime.value === "day") {
                 this.workTime.timeInMinutes=this.amountOfTime * 60 * 24
 
             }
-            if (this.selectedTime === "minute") {
+            if (this.selectedTime.value === "minute") {
                 this.workTime.timeInMinutes=this.amountOfTime
             }
-
+            if (this.authorized === true) {
+                this.workTime.currentUser = this.userData.id
+                console.log(this.id, this.workTime);
+                api.Task.changeWorktimeTask(this.id, this.workTime)
+            }
             this.isActive = !this.isActive
+            this.getAll(this.id)
         },
         toEdit(){
             const id = this.id
             this.$router.push({name: "TaskEdit", params:{id}})
         },
         commentAdd(){
-            this.addEditComment(this.comentForm)
+            this.comentForm.userId = this.userData.id
+            this.comentForm.taskId = this.id
+            api.Comment.createEditComments(this.comentForm)
+
+            this.getAll(this.id)
+        },
+        status(e){
+            const val = e.target.id
+            console.log(this.id, val);
+            api.Task.changeStatus(this.id, val)
+            this.oneTask(this.id)
         }
     },
     watch:{
-
     },
-    components: { Textarea, Button, Input, SelectOne }
+    components: { Textarea, Button, Input, SelectOne, Comment }
 }
 </script>
 
@@ -306,7 +329,7 @@ export default {
         box-sizing: border-box;
         padding-left: 20px;
     }
-    &-comment{
+         &-comment{
         padding-left: 20px;
         box-sizing: border-box;
         width: 458px;
@@ -334,6 +357,7 @@ export default {
             height: 24px;
         }
     }
+   
 }
 .notion-work{
     position: absolute;
@@ -423,12 +447,6 @@ export default {
             max-width: 60%;
             margin-right: 10px;
         }
-        & .status{
-            width: 78px;
-        }
-        & .button_primary{
-            width: 169px;
-        }
     }
     &-wrapper{
         margin-top: 5px;
@@ -449,12 +467,6 @@ export default {
         &_left{
             width: 66.5%;
             @include flex(flex, row, flex-start, flex-start, no-wrap);
-        }
-        & .card-wrapper_btn{
-            width: 98px;
-            &-primary{
-            width: 228px;
-            }
         }
     }
 }

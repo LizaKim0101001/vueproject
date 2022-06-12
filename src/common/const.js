@@ -5,14 +5,14 @@ export const rankEnum = {
 }
 export const statusArray ={
     opened:[{status:"inProgress", text:"Взять в работу"}, {status:"complete", text:"Сделано"}], 
-    inProgress:[{status:"opened", text:"Переоткрыть"}, {status:"testing", text:"На тестировании"}, {status:"complete", text:"Сделано"}],
+    inProgress:[{status:"opened", text:"Переоткрыть"}, {status:"testing", text:"Тестирование"}, {status:"complete", text:"Сделано"}],
     testing:[{status:"opened", text:"Переоткрыть"}, {status:"complete", text:"Сделано"}],
-    complete:[{status:"opened", text:"Переоткрыть"}, {status:"complete", text:"Сделано"}],
+    complete:[{status:"opened", text:"Переоткрыть"}]
 }
 export const statusEnum = {
     opened: {text:"Переоткрыть"},
     inProgress: {text:"Взять в работу"},
-    testing :{text:"На тестировании"},
+    testing :{text:"Тестирование"},
     complete :{text:"Сделано"}
 }
 export const typeEnum={

@@ -5,7 +5,7 @@
             <h3 class="card-header_title">{{title}}</h3>
         </div>
         <div class="card-wrapper">
-            <Button class="button button_primary card-wrapper_btn-primary" type="submit" @click.native="Form">Сохранить</Button>
+            <Button class="button button_primary card-wrapper_btn" type="submit" @click.native="Form">Сохранить</Button>
             <Button class="button card-wrapper_btn" type="reset">Отмена</Button>
         </div>
     </section>
@@ -18,9 +18,9 @@
                         </SelectOne>
                      </li>
                         <li class="task-about_item">
-                        <SelectOne :options="usersOptions"   v-model="selectedUser">
+                         <SelectOne :options="usersOptions"   v-model="selectedUser">
                             Исполнитель
-                        </SelectOne>
+                        </SelectOne> 
                     </li> 
                     <li class="task-about_item">
                         <SelectOne :options="rankOptions" v-model="selectedRank">
@@ -61,12 +61,13 @@ export default {
                     rank: ""
                 },
             usersOptions:[]
-            
         };
     },
     props: {},
     computed: {
         ...mapGetters('index', ['users', 'userData']),
+        ...mapGetters('task', ['task', 'adTaskToUser']),
+
 
          typeOptions(){
             return typeOptions
@@ -96,7 +97,6 @@ export default {
         },
         selectedType(){
             if (this.id) {
-                console.log(typeEnum[this.taskCreateEdit.type]);
                 return typeEnum[this.taskCreateEdit.type]
             } else {
                 return {text:"Выберите тип", value: ""}
@@ -104,9 +104,13 @@ export default {
         },
         selectedUser(){
             if (this.id) {
-            return this.usersOptions.find(user => user.value === this.taskCreateEdit.assignedId);
+                if (this.users.find(user => user.id === this.task.assignedId) === undefined) {
+                    return {text:"Выберите исполнителя", value: ""}
+                } else {
+                    return {text:`${this.users.find(user => user.id === this.task.assignedId).username}`, value: `${this.task.assignedId}`}
+                }
             } else {
-                return {text:"Выберите исполнителя", value: ""}
+                return this.adTaskToUser
             }
         },
 
@@ -123,11 +127,10 @@ export default {
         this.fetchUsers()
         .then((data)=>{
             for (let i = 0; i < data.length; i++) {
-                    let obj = {text:data[i].username, value:data[i].id}
-                    this.usersOptions.push(obj)
-            }
+				let obj = {text:data[i].username, value:data[i].id}
+				this.usersOptions.push(obj)
+				}
         })
-        console.log(this.usersOptions[0]);
     },
     methods: {
         ...mapActions('task',[ 'commentWorkTime', 'addEditTask', 'oneTask']),
@@ -143,7 +146,6 @@ export default {
             this.taskCreateEdit.rank = this.selectedRank.value
             this.taskCreateEdit.assignedId = this.selectedUser.value
             if (this.id === null || this.id === undefined) {
-                console.log( this.userData);
                 this.taskCreateEdit.userId = this.userData.id
             }
             this.addEditTask(this.taskCreateEdit)
@@ -157,7 +159,32 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import "../scss/blocks/card-header.scss";
+.card{
+    &-header{
+        @include flex (flex, row, space-between, flex-start, no-wrap);
+        max-width: 1280px;
+        width: 100%;
+        margin-bottom: 20px;
+        &_title{
+            @include font("Roboto", 24px, 28px, 300, $text);
+            margin-right: 10px;
+            max-width: 60%;
+            margin-right: 10px;
+        }
+    }
+    &-wrapper{
+        margin-top: 5px;
+        @include flex (flex, row, flex-end, flex-start, no-wrap);
+        width: 33.5%;
+        &_btn{
+            margin-left: 10px;
+        }
+    }
+        &_left{
+            width: 66.5%;
+            @include flex(flex, row, flex-start, flex-start, no-wrap);
+        }
+}
 .task{
     &-information{
         width: 100%;

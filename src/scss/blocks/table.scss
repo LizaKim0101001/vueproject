@@ -1,0 +1,113 @@
+.table{
+    width: 100%;
+    max-width: 1280px;
+    min-height: 684px;
+    height: 100%;
+    box-shadow: inset 0px 0px 2px 1px #B5B5B5;
+    border-radius: 5px;
+    background-color: $white;
+    position: relative;
+    z-index: 2;
+    box-sizing: border-box;
+    &-wrapper{
+        width: 100%;
+        max-width: 1280px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+        &_list{
+            width: 100%;
+            height: 68px;
+            @include flex(flex, row, space-between, flex-start, no-wrap);
+            padding: 0 30px;
+            box-sizing: border-box;
+        }
+        &_list:nth-child(2n){
+            background-color: #F2F2F2;
+        }
+        &_item{
+            display: block;
+            padding: 22px 0;
+        }
+       
+        &-edit{
+            width: 100%;
+            max-width: 95px;
+            position: relative;
+        }
+        &-name-task{
+            width: 100%;
+            max-width: 527px;
+        }
+        &-users{
+            width: 100%;
+            max-width:180px;
+        }
+        &-status{
+            width: 100%;
+            max-width: 120px;
+        }
+        &-priority{
+            max-width: 120px;
+            width: 100%;
+            & .table-cell{
+                position: relative;
+                padding-left: 30px;
+            }}
+            .high::after{
+                content: "";
+                top: 6px;
+                left: 12px;
+                width: 14px;
+                height: 8px;
+                position: absolute;
+                box-sizing: border-box;
+                background-image: url("../assets/images/hight.svg");
+                background-repeat: no-repeat;
+            }
+            .medium::after{
+                content: "";
+                top: 7px;
+                left: 12px;
+                width: 14px;
+                height: 6px;
+                position: absolute;
+                box-sizing: border-box;
+                background-image: url("../assets/images/medium.svg");
+                background-repeat: no-repeat;
+            }
+            .low::after{
+                content: "";
+                top: 6px;
+                left: 12px;
+                width: 14px;
+                height: 8px;
+                position: absolute;
+                box-sizing: border-box;
+                background-image: url("../assets/images/low.svg");
+                background-repeat: no-repeat;
+            }
+        
+    }
+
+     .type{
+            width: 100%;
+            max-width: 68px;
+            height: 24px;
+            & .bug{
+                width: 24px;
+                height: 24px;
+                background-size: 24px 24px;
+                background-repeat: no-repeat;
+                background-position: center;
+                background-image: url("../assets/images/error.svg");
+            }
+            & .task{            
+                width: 24px;
+                height: 24px;
+                background-size: 24px 24px;
+                background-repeat: no-repeat;
+                background-position: center;
+                background-image: url("../assets/images/task.svg");
+            }
+        }

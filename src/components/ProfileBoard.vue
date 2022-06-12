@@ -2,29 +2,34 @@
 <div>
     <section class="card-header">
             <div class="card-wrapper_left">
-                <h3 class="card-header_title">{users.oneUser.username}</h3>
+                <h3 class="card-header_title">{{profileData.username}}</h3>
             </div>
             <div class="card-wrapper">
                 <Button class="button"><div @click="toAdd">Добавить задачу</div></Button>
-                <Button class="button button_primary">Редактировать</Button>
+                <Button class="button button_primary" v-show="isYou" @click.native="toggle"> Редактировать</Button>
             </div>
     </section>
     <section class="profile">
         <div class="task-about">
-            <img src={photoUrl} alt="" class="profile_avatar" />
+            <img :src="profileData.photoUrl" alt="" class="profile_avatar" />
                 <ul class="profile_user-about">
                     <li class="profile_title"> О себе
                     </li>
-                    <li key={aboutArray} class="profile_text">{aboutArray}</li>
+                    <li key={aboutArray} class="profile_text">{{profileData.about}}</li>
                 </ul>
              </div>
             <p class="task-information_divide"></p>
             <div class="profile-tasks">
                 <p class="profile_title">Задачи</p>
                 <table class="table">
-                    <TaskItem1 :taskItem="data" />
+                    <TaskItem1 :taskItem="item" v-for="item in data" :key="item.id" />
                 </table>
-                <Paging total="42"/>
+                <Paging 
+                :total="total" 
+                pathname="TasksList" 
+                :filter="taskFilter" 
+                @pag="pag"
+                 />
             </div>
             </section>
             <section class="notion-work" v-if="isActive">
@@ -60,10 +65,12 @@ import TaskItem from './TaskItem.vue';
 import Paging from './Paging.vue';
 import TaskItem1 from './TaskItem.vue';
 import Textarea from './Textarea.vue';
+import { mapGetters, mapActions } from 'vuex'
+
 export default {
     data() {
         return {
-            isActive: true,
+            isActive: false,
             editProfile : {
                 id: "",
                 login: "",
@@ -72,34 +79,97 @@ export default {
                 photoUrl: "",
                 password: ""
             },
+            total: "",
             data: {
-                id: "sdsd",
-                userId: "23iugi",
-                assignedId: "sd7678",
-                title: "task1",
-                description: "skjfhlsfh ksdjhfkjsdhf",
-                type: "task",
-                dateOfCreation: "2022-06-05T12:59:58.859Z",
-                dateOfUpdate: "2022-06-05T12:59:58.859Z",
-                timeInMinutes: 0,
-                status: "opened",
-                rank: "low"
-                }
+                },
+            taskFilter : {
+                filter: {
+                query: "",
+                assignedUsers: [
+                ],
+                userIds: [
+                ],
+                type: [
+                ],
+                status: [
+                ],
+                rank: [
+                ]
+                },
+                page: 0,
+                limit: 10,
+            },
+            profileData: {},
+            taskToUser: {},
+            users: {}
         };
     },
     props: {},
     computed: {
+        ...mapGetters('index', ['oneUser','userData']),
+        ...mapGetters('task', ['filteredData', 'totalTask', 'adTaskToUser']),
+        id(){
+            return this.$route.params.id
+        },
+        isYou(){
+            if (this.id === this.userData.id) {
+                this.editProfile.id = this.userData.id
+                this.editProfile.username = this.userData.username
+                this.editProfile.login = this.userData.login
+                this.editProfile.about = this.userData.about
+                this.editProfile.photoUrl = this.userData.photoUrl
+                return true
+            } else {
+                return false
+            }
+        },
+        toggle(){
+            this.isActive = !this.isActive
+        },
+        
+
     },
     mounted() {
+        this.taskToUser = this.adTaskToUser
+        this.taskFilter.filter.assignedUsers = this.id
+        this.filterTasks(this.taskFilter)
+        .then((data)=>{
+            this.data = data.data
+            this.total = data.total
+        })
+        this.getOne(this.id)
+        .then(({data})=>{
+            this.profileData = data
+        })
+        this.fetchUsers()
+        .then((data)=>{
+            this.users = data
+        })
     },
     methods: {
+        ...mapActions('task',[ 'filterTasks', 'setAdTaskToUser']),
+        ...mapActions('index',['fetchUsers', 'getOne', 'editProfileUser', 'fetchUsers']),
         subEditProfile(){
             console.log(this.editProfile);
+            this.editProfileUser(this.editProfile)
             this.isActive = !this.isActive
         },
         close(){
             this.isActive = !this.isActive
-        }
+        },
+         pag(value){
+            this.taskFilter.page = value
+            this.filterTasks(this.taskFilter)
+            .then((data)=>{
+                this.total = data.total
+            })
+        },
+        toAdd(){
+            this.taskToUser.text = this.users.find(user => user.id === this.id).username
+            this.taskToUser.value = this.id
+            this.setAdTaskToUser(this.taskToUser)
+            this.$router.push({name: "TaskAdd"})
+        },
     },
     watch:{
 
@@ -208,6 +278,7 @@ export default {
         margin-right: 10px;
     }
 }
+
 .buttons-wrapper{
     width: 100%;
     padding-left: 30px;
@@ -217,5 +288,41 @@ export default {
 }
 .erase{
     text-decoration: none;
+}
+.card{
+    &-header{
+        margin-bottom: 20px;
+        width: 100%;
+        max-width: 1280px;
+        box-sizing: border-box;
+        @include flex(flex, row, space-between, flex-start, no-wrap);
+        &_title{
+            @include font("Roboto", 24px, 28px, 300, $text);
+            margin-right: 10px;
+            max-width: 60%;
+            margin-right: 10px;
+        }
+    }
+    &-wrapper{
+        margin-top: 5px;
+        @include flex(flex, row, space-between, center, no-wrap);
+        & .button{
+           padding: 2px 10px;
+            margin-right: 10px;
+            &:last-of-type{
+                margin-right: 0;
+            }
+            &.button_primary{
+                width: 155px;
+            }
+            &.button_error{
+                width:103px;
+            }
+        }
+        &_left{
+            width: 66.5%;
+            @include flex(flex, row, flex-start, flex-start, no-wrap);
+        }
+    }
 }
 </style>

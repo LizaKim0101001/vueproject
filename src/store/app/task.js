@@ -2,18 +2,19 @@ import api from '@/api'
 
 export const mutation = {
 	SET_FILTERED_DATA : 'SET_FILTERED_DATA',
-	SET_ONE_TASK: 'SET_ONE_TASK',
+	SET_TASK: 'SET_TASK',
 	SET_TOTAL: 'SET_TOTAL',
 	SET_CREATE_EDIT: 'SET_CREATE_EDIT',
 	SET_TASK_FILTER: 'SET_TASK_FILTER',
-	SET_WORKTIME: 'SET_WORKTIME'
+	SET_WORKTIME: 'SET_WORKTIME',
+    SET_ADTASKTOUSER: 'SET_ADTASKTOUSER'
 }
 
 export default {
 	namespaced: true,
 	state: {
 		filteredData : [],
-		oneTask : [],
+		task : [],
 		totalTask : 0,
 		createEdit : {
 			id: "",
@@ -46,23 +47,25 @@ export default {
 			comment: "",
 			currentUser: ""
 		},
+        adTaskToUser : {text:"Выберите исполнителя", value: ""},
 	},
 
 	getters: {
 		filteredData: state => state.filteredData,
-		oneTask: state => state.oneTask,
+		task: state => state.task,
 		totalTask: state => state.totalTask,
 		createEdit: state => state.createEdit,
 		taskFilter: state => state.taskFilter,
-		workTime: state => state.workTime
+		workTime: state => state.workTime,
+        adTaskToUser: state => state.adTaskToUser
 	},
 
 	mutations: {
 		[mutation.SET_FILTERED_DATA]:(state, data)=>{
 			state.filteredData = data
 		},
-		[mutation.SET_ONE_TASK]:(state, data)=>{
-			state.oneTask = data
+		[mutation.SET_TASK]:(state, data)=>{
+			state.task = data
 		},
 		[mutation.SET_TOTAL]:(state, data)=>{
 			state.totalTask = data
@@ -76,15 +79,18 @@ export default {
 		[mutation.SET_WORKTIME]:(state, data)=>{
 			state.workTime = data
 		},
+        [mutation.SET_ADTASKTOUSER]: (state, data)=>{
+            state.adTaskToUser = data
+        }
 },
 
 	actions: {
 		filterTasks:({commit}, value)=>{
-			commit(mutation.SET_TASK_FILTER, value)
-			api.Task.getFilterTasks(value)
+			return api.Task.getFilterTasks(value)
 			.then(({data})=>{
 				commit(mutation.SET_TOTAL, data.total)
 				commit(mutation.SET_FILTERED_DATA, data.data)
+                return data
 			})
 		},
         commentWorkTime:(id, value)=>{
@@ -93,12 +99,19 @@ export default {
         oneTask:({commit}, id)=>{
             return api.Task.getOneTask(id)
             .then(({data})=>{
-                commit(mutation.SET_ONE_TASK, data)
+                commit(mutation.SET_TASK, data)
                 return data
             })
         },
         addEditTask:({commit}, body)=>{
             api.Task.createEditTask(body)
+        },
+        setStatus:({dispatch},id, status)=>{
+            api.Task.changeStatus(id, status)
+            dispatch('oneTask', id)
+        },
+        setAdTaskToUser:({commit}, value)=>{
+            commit(mutation.SET_ADTASKTOUSER, value)
         }
 	}
 }

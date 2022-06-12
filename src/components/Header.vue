@@ -1,30 +1,25 @@
   <template>
     <header class="header">
-        <div class="wrapper-header" v-if="authorized">
-                <router-link class="erase" :to="authorize">
-                    <p class="logo" alt="Логотип"/> 
-                </router-link> 
+        <div class="wrapper-header">
+                <p class="logo" alt="Логотип" @click="toAuthorize"/> 
                 <ul class="navigation">
                     <li  class="navigation_item" @click="toTaskList">Задачи</li>
                     <li class="navigation_item" @click="toUserList">Пользователи</li>
                 </ul>
-                <Dropdown  class="head"  >
-                    <template v-slot:header>
-                        <div class="user-profile" >
-                            <p class="user-profile_name" >{{userData.username}}</p>
-                            <img :src="userData.photoUrl" class="user-profile_img" alt="аватар пользователя" />
-                        </div>
-                    </template>
-                    <template v-slot:list>
-                        <button class="dropdown-item">Просмотреть профиль</button>
-                        <button class="dropdown-item dropdown-item_er" @click="logoutUser">Выйти из системы</button>
-                    </template>
-                </Dropdown>
-            </div>
-            <div class="wrapper-header" v-else="authorized">
-                <router-link class="erase" :to="authorize">
-                    <p class="logo" alt="Логотип"/> 
-                </router-link> 
+                <div class="head">
+                    <Dropdown  v-show="authorized">
+                        <template v-slot:header>
+                            <div class="user-profile" >
+                                <p class="user-profile_name" >{{userData.username}}</p>
+                                <img :src="userData.photoUrl" class="user-profile_img"/>
+                            </div>
+                        </template>
+                        <template v-slot:list>
+                            <button class="dropdown-item" @click="toProfile">Просмотреть профиль</button>
+                            <button class="dropdown-item dropdown-item_er" @click="logoutUser">Выйти из системы</button>
+                        </template>
+                    </Dropdown>
+                </div>
             </div>
         </header>
   </template>
@@ -36,32 +31,50 @@ import { mapGetters, mapActions } from 'vuex'
 export default {
     data() {
         return {
-            authorize:{
-                name: "Authorize"
-            }
+            authorized : 'false',
+            loginData: {login: '', password:""},
         };
     },
     props: {
     },
     computed: {
-        ...mapGetters('index', ['userData', 'authorized']),
+        ...mapGetters('index', ['userData'])
     },
     mounted() {
+        if (localStorage.authorized === 'true') { 
+            this.authorized = localStorage.authorized        
+            if (localStorage.login) {
+            this.loginData.login = localStorage.login 
+            }
+            if (localStorage.password) {
+                this.loginData.password  = localStorage.password
+            }
+            this.login(this.loginData)
+        } else {
+            this.logout()
+        }
+        console.log(this.userData);
     },
     methods: {
-        ...mapActions('index',['logout']),
-
-        toggle() {
-            this.isActive = !this.isActive;
-        },
+        ...mapActions('index',['logout', 'login']),
         toTaskList(){
             this.$router.push({name:"TasksList"})
+        },
+        toAuthorize(){
+            this.$router.push({name: "Authorize"})
+
         },
         toUserList(){
             this.$router.push({name: "Users"})
         },
         logoutUser(){
+            localStorage.authorized = false
+            localStorage.removeItem('login')
+            localStorage.removeItem('password')
             this.logout()
+        },
+        toProfile(){
+            this.$router.push({path:`/profile/${this.userData.id}`})
         }
     },
     components: { Dropdown }
@@ -72,7 +85,7 @@ export default {
 @import "../scss/inject.scss";
    .header{
     padding: 9px 20px;
-    margin: 0 auto;
+    margin: 0 auto 10px auto;
     width: 100%;
     max-width: 1440px;
     box-sizing: border-box;
@@ -116,17 +129,8 @@ export default {
             width: 42px;
             height: 42px;
             border-radius: 50%;
+            border-bottom: none;
+        }
+    }
 
-        }
-    }
-    .popup{
-        &-header{
-        width: 136px;
-        &-item{
-        padding: 2px 0;
-        width: 136px;
-        height: 24px;
-        }
-    }
-    }
 </style>

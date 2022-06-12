@@ -74,7 +74,7 @@ export default api => {
                 data: body
             })
         },
-    }
+    };
     api.Comment ={
       getAllComments(id){
         return api.instance.request({

@@ -1,10 +1,16 @@
 .card{
     &-header{
-        margin-bottom: 20px;
-        width: 100%;
+        margin-right: auto;
+        margin-left: auto;
         max-width: 1280px;
-        box-sizing: border-box;
-        @include flex(flex, row, space-between, flex-start, no-wrap);
+        width: 100%;
+        &_wrapper{
+            margin-bottom: 20px;
+            width: 100%;
+            max-width: 1280px;
+            box-sizing: border-box;
+            @include flex(flex, row, space-between, flex-start, no-wrap);
+        }
         &_title{
             @include font("Roboto", 24px, 28px, 300, $text);
             margin-right: 10px;
@@ -20,7 +26,6 @@
     }
     &-wrapper{
         margin-top: 5px;
-        @include flex(flex, row, space-between, center, no-wrap);
         & .button{
            padding: 2px 10px;
             margin-right: 10px;
@@ -37,12 +42,6 @@
         &_left{
             width: 66.5%;
             @include flex(flex, row, flex-start, flex-start, no-wrap);
-        }
-        & .card-wrapper_btn{
-            width: 98px;
-            &-primary{
-            width: 228px;
-            }
         }
     }
 }

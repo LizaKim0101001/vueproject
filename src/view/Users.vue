@@ -1,9 +1,12 @@
 <template>
     <div>
-            <section className="board">
-                <Boardheader/>
+            <section class="board">
                 <UserList/>
-                <Paging pathname="Users"/>
+                <Paging 
+                pathname="Users" 
+                :filter="userFilter" 
+                @pag="pag" 
+                :total="total" />
             </section>
     </div>
 </template>
@@ -12,23 +15,44 @@
 import Boardheader from '../components/Boardheader.vue';
 import UserList from '../components/UserList.vue';
 import Paging from '../components/Paging.vue';
+import { mapGetters, mapActions } from 'vuex'
 
 export default {
     data() {
         return {
-           authorized: true,
+            userFilter : {
+                filter: {
+                query: ""
+                },
+                page: 0,
+                limit: 10
+		    },
+            total: 0,
         };
     },
     props: {},
     computed: {
-    },
-    mounted() {
 
     },
+    mounted() {
+        this.filterUser(this.userFilter)
+            .then((data)=>{
+                this.total = data.total
+        })
+    },
     methods: {
+         ...mapActions('index',['login', 'filterUser']),
+
         toProfile(user){
             this.$router.push({path:`/profile/${user.id}`})
         },
+        pag(value){
+            this.userFilter.page = value
+            this.filterUser(this.userFilter)
+            .then((data)=>{
+                this.total = data.total
+            })
+        }
 },
     
     components: { Boardheader, UserList, Paging }
@@ -36,14 +60,6 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.board{
-    width: 100%;
-    max-width: 1280px;
-    padding: 30px 80px;
-    box-sizing: border-box;
-    @include flex(flex, column, center, center, no-wrap);
-}
-.erase{
-    text-decoration: none;
-}
+@import "../scss/blocks/board.scss";
+
 </style>

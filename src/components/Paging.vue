@@ -18,21 +18,25 @@ export default {
     data() {
         return {
             userPerPage: 10,
-            filter: {},
         };
     },
     props: {
         "pathname": String,
+        "filter": {
+            type: Object
+        },
+        "total":{
+            type: Number
+        }
     },
     computed: {
-        ...mapGetters('task', ['taskFilter', 'totalTask']),
-        ...mapGetters('index',['userFilter', 'total']),
+        ...mapGetters('index',['userFilter',]),
         firstOfPage() {
             return (1 + (this.filter.page * this.filter.limit));
         },
         pages(){
             if (this.pathname === "TasksList") {
-                return Math.ceil(this.totalTask / this.filter.limit);
+                return Math.ceil(this.total / this.filter.limit);
             }
              if (this.pathname === "Users"){
                 return Math.ceil(this.total / this.filter.limit);
@@ -49,44 +53,36 @@ export default {
 
     },
     mounted() {
-        if (this.pathname === "Users") {
-            this.filter = this.userFilter
-            this.filterUser(this.filter)
-        }
-        if (this.pathname === "TasksList") {
-            this.filter = this.taskFilter
-            this.filterTasks(this.filter)
-        }
     },
     methods: {
-         ...mapActions('task',[ 'filterTasks']),
+         ...mapActions('task',[ 'filterTasks', 'setFilter']),
          ...mapActions('index',['filterUser']),
         nextPage() {
             this.filter.page = this.filter.page + 1;
             if (this.pathname === "TasksList") {
-                this.filterTasks(this.filter)
+                this.$emit('pag', this.filter.page)
             }
             if (this.pathname === "Users") {
-                this.filterUser(this.filter)
+                this.$emit('pag', this.filter.page)
             }
         },
         prevPage() {
             this.filter.page = this.filter.page - 1;
             if (this.pathname === "TasksList") {
-                this.filterTasks(this.filter)
+            this.$emit('pag', this.filter.page)
             }
             if (this.pathname === "Users") {
-                this.filterUser(this.filter)
+                this.$emit('pag', this.filter.page)
             }
             
         },
         paginate(item) {
             this.filter.page = (item - 1);
             if (this.pathname === "TasksList") {
-                this.filterTasks(this.filter)
+                this.$emit('pag', this.filter.page)
             }
             if (this.pathname === "Users") {
-                this.filterUser(this.filter)
+                this.$emit('pag', this.filter.page)
             }
         }
     },
@@ -99,6 +95,9 @@ export default {
     margin-top: 20px;
     @include flex (flex, row, space-between, center, nowrap);
     width: 100%;
+    max-width: 1280px;
+    margin-left: auto;
+    margin-right: auto;
 &_wrapper{
     width: 50%;
     height: 24px;

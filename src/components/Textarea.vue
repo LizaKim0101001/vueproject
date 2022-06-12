@@ -66,6 +66,7 @@ export default {
 .comment{
     width: 100%;
     max-width: 458px;
+    margin-bottom: 10px;
     & .textarea{
     height: 76px;
     }

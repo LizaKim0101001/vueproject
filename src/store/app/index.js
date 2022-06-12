@@ -9,7 +9,8 @@ export const mutation = {
 	SET_LOGINDATA: 'SET_LOGINDATA',
 	SET_EDITPROFILE: 'SET_EDITPROFILE',
 	SET_USERDATA: 'SET_USERDATA',
-	SET_AUTHORIZED: 'SET_AUTHORIZED'
+	SET_AUTHORIZED: 'SET_AUTHORIZED',
+	SET_USERS_OPTIONS: 'SET_USERS_OPTIONS'
 }
 
 export default {
@@ -36,7 +37,8 @@ export default {
 		  about: "",
 		  photoUrl: "",
 		  password: ""
-		}
+		},
+		usersOptions:[]
 	},
 
 	getters: {
@@ -48,7 +50,8 @@ export default {
 		oneUser: state => state.oneUser,
 		loginData: state => state.loginData,
 		userData: state => state.userData,
-		authorized: state => state.authorized
+		authorized: state => state.authorized,
+		usersOptions: state => state.usersOptions
 
 	},
 
@@ -80,6 +83,9 @@ export default {
 		[mutation.SET_AUTHORIZED]:(state, data)=>{
 			state.authorized = data
 		},
+		[mutation.SET_USERS_OPTIONS]:(state, data)=>{
+			state.usersOptions = data
+		},
 	},
 
 	actions: {
@@ -92,19 +98,24 @@ export default {
 		},
 		filterUser: ({dispatch, commit, getters}, value) =>{
 			commit(mutation.SET_USERS_FILTER, value)
-			api.Users.getFilterUsers(value)
+			return api.Users.getFilterUsers(value)
 			.then(({data})=>{
 				commit(mutation.SET_TOTAL, data.total)
 				commit(mutation.SET_FILTERED, data.data)
+				return data
 			})
+		},
+		setFilter:({commit}, value)=>{
+			commit(mutation.SET_USERS_FILTER, value)
 		},
 		getOne({commit},id){
-			api.Users.getOneUsers(id)
+			return api.Users.getOneUsers(id)
 			.then((data)=>{
 				commit(mutation.SET_ONEUSER, data)
+				return data
 			})
 		},
-		editProfile({commit}, body){
+		editProfileUser({commit}, body){
 			commit(mutation.SET_EDITPROFILE, body)
 			api.Users.editUser(body)
 			.then((data)=>{
@@ -113,16 +124,19 @@ export default {
 		},
 		login({commit}, body){
 			commit(mutation.SET_LOGINDATA, body)
-			api.Users.postLogin(body)
-			.then(({data})=>{
-				commit(mutation.SET_AUTHORIZED, true)
-				commit(mutation.SET_USERDATA, data)
+			return api.Users.postLogin(body)
+			.then((data)=>{
+				if (data.status === 200) {
+					commit(mutation.SET_AUTHORIZED, true)
+					commit(mutation.SET_USERDATA, data.data)
+				}
+				return data
 			})
 		},
 		logout({commit}){
 			commit(mutation.SET_AUTHORIZED, false)
+			commit(mutation.SET_USERDATA, [])
 		},
-
 	},
 }
 
